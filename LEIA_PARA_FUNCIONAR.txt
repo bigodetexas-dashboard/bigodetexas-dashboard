@@ -1,0 +1,24 @@
+==============================================================================
+                     COMO FAZER O BOT FUNCIONAR
+==============================================================================
+
+Se voce clicou no "run_bot.bat" e a janela fechou na hora, ou apareceu um erro,
+muito provavelmente voce NAO tem o Python instalado.
+
+SIGA ESTES PASSOS:
+
+1. BAIXAR PYTHON
+   Acesse este link: https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe
+
+2. INSTALAR (MUITO IMPORTANTE)
+   Ao abrir o instalador, voce PRECISA marcar a caixinha:
+   [X] Add Python to PATH   <--- MARQUE ISSO!
+   
+   Depois clique em "Install Now".
+
+3. TESTAR
+   Apos instalar, tente abrir o arquivo "run_bot.bat" novamente.
+
+------------------------------------------------------------------------------
+Se ainda der erro, tire um print da tela e me mande!
+==============================================================================

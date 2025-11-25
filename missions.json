@@ -1,0 +1,41 @@
+{
+    "daily_missions": [
+        {
+            "id": "kill_5",
+            "name": "Caçador",
+            "description": "Mate 5 jogadores",
+            "type": "kills",
+            "target": 5,
+            "reward": 500,
+            "icon": "💀"
+        },
+        {
+            "id": "survive_2h",
+            "name": "Sobrevivente",
+            "description": "Sobreviva por 2 horas sem morrer",
+            "type": "survival",
+            "target": 7200,
+            "reward": 300,
+            "icon": "⏱️"
+        },
+        {
+            "id": "long_shot",
+            "name": "Atirador de Elite",
+            "description": "Faça um kill a mais de 300m",
+            "type": "distance",
+            "target": 300,
+            "reward": 400,
+            "icon": "🎯"
+        },
+        {
+            "id": "killstreak_3",
+            "name": "Imparável",
+            "description": "Consiga uma sequência de 3 kills",
+            "type": "streak",
+            "target": 3,
+            "reward": 350,
+            "icon": "🔥"
+        }
+    ],
+    "active_missions": {}
+}

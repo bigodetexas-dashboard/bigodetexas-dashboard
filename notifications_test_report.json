@@ -1,0 +1,57 @@
+{
+    "total_sent": 3,
+    "notifications": [
+        {
+            "timestamp": "2025-11-25T13:11:33.121450",
+            "title": "PvP Kill",
+            "message": "**JogadorPro** eliminou **Noob123**",
+            "color": "0xef4444",
+            "urgent": false,
+            "fields": [
+                {
+                    "name": "Arma",
+                    "value": "M4A1",
+                    "inline": true
+                },
+                {
+                    "name": "Distância",
+                    "value": "350m",
+                    "inline": true
+                }
+            ]
+        },
+        {
+            "timestamp": "2025-11-25T13:11:33.121450",
+            "title": "Guerra de Clãs - Atualização",
+            "message": "**WOLVES** vs **BEARS**",
+            "color": "0xf59e0b",
+            "urgent": false,
+            "fields": [
+                {
+                    "name": "WOLVES",
+                    "value": "5",
+                    "inline": true
+                },
+                {
+                    "name": "BEARS",
+                    "value": "3",
+                    "inline": true
+                }
+            ]
+        },
+        {
+            "timestamp": "2025-11-25T13:11:33.121450",
+            "title": "Missão Completa!",
+            "message": "**JogadorPro** completou: Cacador (5 kills)",
+            "color": "0x10b981",
+            "urgent": false,
+            "fields": [
+                {
+                    "name": "Recompensa",
+                    "value": "500 DZ Coins",
+                    "inline": true
+                }
+            ]
+        }
+    ]
+}

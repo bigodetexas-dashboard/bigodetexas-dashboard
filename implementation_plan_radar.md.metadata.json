@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Plano para implementar o Radar de Bases lendo logs do Nitrado e enviando alertas para o Discord.",
+  "updatedAt": "2025-11-22T21:08:31.145261800Z"
+}

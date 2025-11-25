@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estatísticas - BigodeTexas</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">🤠 BigodeTexas</a>
+            <ul class="navbar-nav">
+                <li><a href="/" class="nav-link">Início</a></li>
+                <li><a href="/stats" class="nav-link">Estatísticas</a></li>
+                <li><a href="/leaderboard" class="nav-link">Ranking</a></li>
+                <li><a href="/shop" class="nav-link">Loja</a></li>
+                <li><a href="/heatmap" class="nav-link">Mapa de Calor</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="fade-in" style="margin-bottom: 2rem;">📊 Estatísticas do Servidor</h1>
+
+        <div id="stats-container" class="grid grid-4">
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="total-kills">-</div>
+                <div class="stat-label">💀 Total de Kills</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="total-deaths">-</div>
+                <div class="stat-label">⚰️ Total de Mortes</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="total-players">-</div>
+                <div class="stat-label">👥 Jogadores Registrados</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="total-coins">-</div>
+                <div class="stat-label">💰 DZ Coins em Circulação</div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-2" style="margin-top: 3rem;">
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">📊 Kills ao Longo do Tempo</h3>
+                </div>
+                <div style="height: 300px; padding: 1rem;">
+                    <canvas id="killsChart"></canvas>
+                </div>
+            </div>
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">🔫 Armas Mais Usadas</h3>
+                </div>
+                <div style="height: 300px; padding: 1rem;">
+                    <canvas id="weaponsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card fade-in" style="margin-top: 2rem;">
+            <div class="card-header">
+                <h3 class="card-title">📈 Distribuição de K/D</h3>
+            </div>
+            <div style="height: 300px; padding: 1rem;">
+                <canvas id="kdChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card fade-in" style="margin-top: 3rem;">
+            <div class="card-header">
+                <h3 class="card-title">ℹ️ Sobre o Servidor</h3>
+            </div>
+            <p class="text-secondary">
+                BigodeTexas é um servidor DayZ focado em PvP intenso e economia balanceada.
+                Ganhe DZ Coins matando inimigos, sobrevivendo e completando desafios.
+                Use suas moedas para comprar equipamentos premium na loja.
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/charts.js"></script>
+    <script>
+        startAutoRefresh(loadStats, 30000);
+        // Load charts after stats are loaded
+        setTimeout(() => {
+            createKillsChart();
+            createWeaponsChart();
+            createKDChart();
+        }, 1000);
+    </script>
+</body>
+
+</html>

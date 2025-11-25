@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigodeTexas Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                🤠 BigodeTexas
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="/" class="nav-link">Início</a></li>
+                <li><a href="/stats" class="nav-link">Estatísticas</a></li>
+                <li><a href="/leaderboard" class="nav-link">Ranking</a></li>
+                <li><a href="/shop" class="nav-link">Loja</a></li>
+                <li><a href="/heatmap" class="nav-link">Mapa de Calor</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div style="text-align: center; margin: 4rem 0;">
+            <h1 class="fade-in" style="font-size: 3.5rem; margin-bottom: 1rem;">
+                🤠 BigodeTexas Dashboard
+            </h1>
+            <p class="text-secondary fade-in" style="font-size: 1.25rem; max-width: 600px; margin: 0 auto;">
+                Bem-vindo ao painel de controle do servidor BigodeTexas. Explore as estatísticas, rankings e muito mais.
+            </p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div id="stats-container" class="grid grid-4" style="margin-top: 3rem;">
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="total-kills">-</div>
+                <div class="stat-label">💀 Total de Kills</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="total-deaths">-</div>
+                <div class="stat-label">⚰️ Total de Mortes</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="total-players">-</div>
+                <div class="stat-label">👥 Jogadores</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="total-coins">-</div>
+                <div class="stat-label">💰 DZ Coins</div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="grid grid-3" style="margin-top: 3rem;">
+            <a href="/leaderboard" class="card fade-in" style="text-decoration: none; color: inherit;">
+                <div class="card-header">
+                    <h3 class="card-title">🏆 Rankings</h3>
+                    <span class="card-icon">→</span>
+                </div>
+                <p class="text-muted">Veja os melhores jogadores do servidor</p>
+            </a>
+            <a href="/shop" class="card fade-in" style="text-decoration: none; color: inherit;">
+                <div class="card-header">
+                    <h3 class="card-title">🛒 Loja</h3>
+                    <span class="card-icon">→</span>
+                </div>
+                <p class="text-muted">Explore os itens disponíveis para compra</p>
+            </a>
+            <a href="/heatmap" class="card fade-in" style="text-decoration: none; color: inherit;">
+                <div class="card-header">
+                    <h3 class="card-title">🗺️ Mapa de Calor</h3>
+                    <span class="card-icon">→</span>
+                </div>
+                <p class="text-muted">Visualize as zonas de PvP mais quentes</p>
+            </a>
+        </div>
+
+        <!-- Active Wars -->
+        <div style="margin-top: 3rem;">
+            <h2 class="fade-in" style="margin-bottom: 1.5rem;">⚔️ Guerras Ativas</h2>
+            <div id="wars-container" class="grid grid-2">
+                <div class="loading text-center">Carregando...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        // Load stats and wars on page load
+        startAutoRefresh(loadStats, 30000);
+        startAutoRefresh(loadWars, 30000);
+    </script>
+</body>
+</html>

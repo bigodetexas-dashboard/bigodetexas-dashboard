@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rankings - BigodeTexas</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">🤠 BigodeTexas</a>
+            <ul class="navbar-nav">
+                <li><a href="/" class="nav-link">Início</a></li>
+                <li><a href="/stats" class="nav-link">Estatísticas</a></li>
+                <li><a href="/leaderboard" class="nav-link">Ranking</a></li>
+                <li><a href="/shop" class="nav-link">Loja</a></li>
+                <li><a href="/heatmap" class="nav-link">Mapa de Calor</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="fade-in" style="margin-bottom: 2rem;">🏆 Rankings</h1>
+
+        <div id="leaderboard-container" class="grid grid-2">
+            <!-- Top Kills -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">💀 Top Kills</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Jogador</th>
+                                <th>Kills</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-kills">
+                            <tr>
+                                <td colspan="3" class="text-center loading">Carregando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Top K/D -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">📊 Top K/D Ratio</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Jogador</th>
+                                <th>K/D</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-kd">
+                            <tr>
+                                <td colspan="3" class="text-center loading">Carregando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Top Killstreak -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">🔥 Top Killstreak</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Jogador</th>
+                                <th>Streak</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-streak">
+                            <tr>
+                                <td colspan="3" class="text-center loading">Carregando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Top Longest Shot -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">🎯 Top Tiro Mais Longo</h3>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Jogador</th>
+                                <th>Distância</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-shot">
+                            <tr>
+                                <td colspan="3" class="text-center loading">Carregando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        startAutoRefresh(loadLeaderboard, 30000);
+    </script>
+</body>
+
+</html>

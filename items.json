@@ -1,0 +1,600 @@
+{
+    "armas": {
+        "m4a1": {
+            "name": "M4A1 Tática",
+            "price": 1500,
+            "description": "Rifle de assalto 5.56mm."
+        },
+        "akm": {
+            "name": "AKM",
+            "price": 1200,
+            "description": "Rifle soviético 7.62mm."
+        },
+        "ak74": {
+            "name": "KA-74",
+            "price": 1100,
+            "description": "Rifle moderno 5.45mm."
+        },
+        "ak101": {
+            "name": "KA-101",
+            "price": 1300,
+            "description": "AK moderna calibre 5.56mm."
+        },
+        "lar": {
+            "name": "LAR (FAL)",
+            "price": 2500,
+            "description": "Rifle de batalha .308."
+        },
+        "aur_ax": {
+            "name": "AUR AX (AUG)",
+            "price": 1600,
+            "description": "Rifle bullpup 5.56mm."
+        },
+        "famas": {
+            "name": "LE-MAS (Famas)",
+            "price": 1400,
+            "description": "Cadência de tiro insana."
+        },
+        "vsd": {
+            "name": "VSD (SVD)",
+            "price": 2200,
+            "description": "Sniper semi-auto 7.62x54mm."
+        },
+        "mosin": {
+            "name": "Mosin 91/30",
+            "price": 1000,
+            "description": "Sniper de ferrolho clássica."
+        },
+        "tundra": {
+            "name": "M70 Tundra",
+            "price": 1300,
+            "description": "Caçadora .308 precisa."
+        },
+        "blaze": {
+            "name": "B-525 (Blaze)",
+            "price": 1200,
+            "description": "Rifle de cano duplo .308."
+        },
+        "savanna": {
+            "name": "CR-550 Savanna",
+            "price": 1300,
+            "description": "Sniper .308 com pente."
+        },
+        "vss": {
+            "name": "VSS Vintorez",
+            "price": 1800,
+            "description": "Sniper silenciosa 9x39mm."
+        },
+        "asval": {
+            "name": "AS VAL",
+            "price": 1800,
+            "description": "Rifle de assalto silencioso."
+        },
+        "ump45": {
+            "name": "USG-45 (UMP)",
+            "price": 800,
+            "description": "SMG tática .45 ACP."
+        },
+        "mp5": {
+            "name": "SG5-K (MP5)",
+            "price": 700,
+            "description": "SMG rápida 9mm."
+        },
+        "bizon": {
+            "name": "PP-19 Bizon",
+            "price": 900,
+            "description": "SMG com pente enorme."
+        },
+        "fx45": {
+            "name": "FX-45 (FNX)",
+            "price": 400,
+            "description": "Pistola tática .45 ACP."
+        },
+        "deagle": {
+            "name": "Deagle",
+            "price": 600,
+            "description": "Canhão de mão .357."
+        },
+        "revolver": {
+            "name": "Revólver",
+            "price": 500,
+            "description": "Clássico e confiável."
+        },
+        "glock": {
+            "name": "Mlock-91",
+            "price": 350,
+            "description": "Pistola 9mm padrão."
+        }
+    },
+    "municao": {
+        "556": {
+            "name": "Cx. 5.56x45mm (20un)",
+            "price": 200,
+            "description": "Para M4, AUG, AK-101."
+        },
+        "762": {
+            "name": "Cx. 7.62x39mm (20un)",
+            "price": 180,
+            "description": "Para AKM, SKS."
+        },
+        "545": {
+            "name": "Cx. 5.45x39mm (20un)",
+            "price": 180,
+            "description": "Para AK-74."
+        },
+        "308": {
+            "name": "Cx. .308 Win (20un)",
+            "price": 250,
+            "description": "Para Tundra, LAR, Blaze."
+        },
+        "54r": {
+            "name": "Cx. 7.62x54mmR (20un)",
+            "price": 250,
+            "description": "Para Mosin, VSD."
+        },
+        "9x39": {
+            "name": "Cx. 9x39mm (20un)",
+            "price": 300,
+            "description": "Para VSS, AS VAL."
+        },
+        "45acp": {
+            "name": "Cx. .45 ACP (25un)",
+            "price": 150,
+            "description": "Para UMP, FX-45."
+        },
+        "9mm": {
+            "name": "Cx. 9mm (25un)",
+            "price": 100,
+            "description": "Para MP5, Glock."
+        },
+        "357": {
+            "name": "Cx. .357 Magnum (20un)",
+            "price": 180,
+            "description": "Para Deagle, Revólver."
+        },
+        "12ga": {
+            "name": "Cx. Calibre 12 (10un)",
+            "price": 150,
+            "description": "Para Escopetas."
+        }
+    },
+    "carregadores": {
+        "mag_m4_60": {
+            "name": "Pente Duplo M4 (60 balas)",
+            "price": 500,
+            "description": "Capacidade máxima 5.56."
+        },
+        "mag_m4_40": {
+            "name": "Pente PMAG M4 (40 balas)",
+            "price": 300,
+            "description": "Polímero estendido."
+        },
+        "mag_m4_30": {
+            "name": "Pente STANAG (30 balas)",
+            "price": 150,
+            "description": "Padrão OTAN."
+        },
+        "mag_akm_drum": {
+            "name": "Tambor AKM (75 balas)",
+            "price": 600,
+            "description": "Poder de fogo massivo."
+        },
+        "mag_akm_30": {
+            "name": "Pente AKM (30 balas)",
+            "price": 150,
+            "description": "Padrão soviético."
+        },
+        "mag_ak74_30": {
+            "name": "Pente AK-74 (30 balas)",
+            "price": 150,
+            "description": "Baquelite ou Polímero."
+        },
+        "mag_lar_20": {
+            "name": "Pente LAR (20 balas)",
+            "price": 200,
+            "description": "Para o FAL."
+        },
+        "mag_vsd_10": {
+            "name": "Pente VSD (10 balas)",
+            "price": 200,
+            "description": "Para SVD."
+        },
+        "mag_vss_20": {
+            "name": "Pente VSS (20 balas)",
+            "price": 250,
+            "description": "Para VSS/VAL."
+        },
+        "mag_ump_25": {
+            "name": "Pente UMP (25 balas)",
+            "price": 100,
+            "description": ".45 ACP."
+        }
+    },
+    "acessorios": {
+        "silenciador_m4": {
+            "name": "Supressor OTAN (5.56)",
+            "price": 400,
+            "description": "Silêncio para M4/AUG."
+        },
+        "silenciador_ak": {
+            "name": "Supressor Leste (Norm)",
+            "price": 400,
+            "description": "Silêncio para AKM/74."
+        },
+        "silenciador_pistola": {
+            "name": "Supressor Pistola",
+            "price": 200,
+            "description": "Para 9mm e .45."
+        },
+        "mira_acog": {
+            "name": "Mira ATOG (4x)",
+            "price": 350,
+            "description": "Ótima para média distância."
+        },
+        "mira_rvn": {
+            "name": "Mira RVN",
+            "price": 200,
+            "description": "Red dot precisa."
+        },
+        "mira_kobra": {
+            "name": "Mira Kobra",
+            "price": 200,
+            "description": "Red dot russa."
+        },
+        "mira_pso1": {
+            "name": "Mira PSO-1",
+            "price": 300,
+            "description": "Para AKs e VSS."
+        },
+        "mira_pso1_1": {
+            "name": "Mira PSO-1-1",
+            "price": 350,
+            "description": "Para VSD (SVD)."
+        },
+        "mira_hunting": {
+            "name": "Mira de Caça (12x)",
+            "price": 400,
+            "description": "Zoom máximo para Tundra/Blaze."
+        },
+        "bateria_9v": {
+            "name": "Bateria 9V",
+            "price": 50,
+            "description": "Para miras e óculos NVG."
+        },
+        "nvg": {
+            "name": "Óculos de Visão Noturna",
+            "price": 2000,
+            "description": "Veja no escuro total."
+        },
+        "cinta_nvg": {
+            "name": "Cinta de Cabeça NVG",
+            "price": 200,
+            "description": "Para usar o NVG sem capacete."
+        }
+    },
+    "construcao": {
+        "tenda_carro": {
+            "name": "Tenda de Carro",
+            "price": 2000,
+            "description": "Cabe um carro dentro."
+        },
+        "tenda_militar": {
+            "name": "Tenda Militar (Grande)",
+            "price": 1500,
+            "description": "Enorme capacidade."
+        },
+        "tenda_media": {
+            "name": "Tenda Média (Azul)",
+            "price": 800,
+            "description": "Abrigo padrão."
+        },
+        "barril": {
+            "name": "Barril",
+            "price": 400,
+            "description": "Armazena itens e líquidos."
+        },
+        "caixa_madeira": {
+            "name": "Caixa de Madeira (Craftada)",
+            "price": 200,
+            "description": "Pequeno baú."
+        },
+        "pregos": {
+            "name": "Caixa de Pregos",
+            "price": 250,
+            "description": "Essencial para construir."
+        },
+        "tabuas": {
+            "name": "Pilha de Tábuas (10x)",
+            "price": 300,
+            "description": "Madeira serrada."
+        },
+        "troncos": {
+            "name": "Troncos de Madeira (4x)",
+            "price": 200,
+            "description": "Base da parede."
+        },
+        "chapas": {
+            "name": "Chapas de Metal",
+            "price": 400,
+            "description": "Paredes blindadas."
+        },
+        "arame": {
+            "name": "Arame Farpado",
+            "price": 150,
+            "description": "Proteção de muros."
+        },
+        "arame_metal": {
+            "name": "Arame de Metal",
+            "price": 100,
+            "description": "Para portões."
+        },
+        "cadeado_4": {
+            "name": "Cadeado (4 Dígitos)",
+            "price": 350,
+            "description": "Segurança máxima."
+        },
+        "cadeado_3": {
+            "name": "Cadeado (3 Dígitos)",
+            "price": 200,
+            "description": "Segurança básica."
+        },
+        "camuflagem": {
+            "name": "Rede de Camuflagem",
+            "price": 200,
+            "description": "Esconda sua base."
+        },
+        "kit_eletrico": {
+            "name": "Kit Elétrico",
+            "price": 150,
+            "description": "Para instalar luzes."
+        },
+        "luz_construcao": {
+            "name": "Luz de Construção",
+            "price": 200,
+            "description": "Ilumine sua base."
+        },
+        "gerador": {
+            "name": "Gerador de Energia",
+            "price": 800,
+            "description": "Eletricidade para a base."
+        }
+    },
+    "ferramentas": {
+        "machado": {
+            "name": "Machado de Bombeiro",
+            "price": 150,
+            "description": "Corta árvores rápido."
+        },
+        "marreta": {
+            "name": "Marreta",
+            "price": 200,
+            "description": "Para construir e destruir."
+        },
+        "pa": {
+            "name": "Pá",
+            "price": 150,
+            "description": "Para enterrar stashes ou bases."
+        },
+        "picareta": {
+            "name": "Picareta",
+            "price": 150,
+            "description": "Para minerar pedras."
+        },
+        "serra": {
+            "name": "Serra de Metal",
+            "price": 100,
+            "description": "Para cortar cadeados ou canos."
+        },
+        "alicate": {
+            "name": "Alicate",
+            "price": 100,
+            "description": "Para fazer portões."
+        },
+        "martelo": {
+            "name": "Martelo",
+            "price": 50,
+            "description": "Construção básica."
+        },
+        "pedra_afiar": {
+            "name": "Pedra de Afiar",
+            "price": 100,
+            "description": "Repara lâminas."
+        },
+        "kit_limpeza_arma": {
+            "name": "Kit Limpeza de Arma",
+            "price": 250,
+            "description": "Repara armas danificadas."
+        },
+        "fita_silver": {
+            "name": "Fita Silver Tape",
+            "price": 100,
+            "description": "Repara quase tudo."
+        },
+        "epoxy": {
+            "name": "Massa Epóxi",
+            "price": 150,
+            "description": "Repara capacetes e coletes."
+        },
+        "kit_costura": {
+            "name": "Kit de Costura",
+            "price": 100,
+            "description": "Repara roupas de tecido."
+        },
+        "kit_couro": {
+            "name": "Kit de Costura (Couro)",
+            "price": 150,
+            "description": "Repara botas e coletes."
+        }
+    },
+    "medico": {
+        "bandagem": {
+            "name": "Bandagem Militar",
+            "price": 100,
+            "description": "Para sangramentos."
+        },
+        "tetraciclina": {
+            "name": "Tetraciclina",
+            "price": 300,
+            "description": "Cura infecções."
+        },
+        "multivitaminas": {
+            "name": "Multivitaminas",
+            "price": 200,
+            "description": "Aumenta imunidade."
+        },
+        "codeina": {
+            "name": "Codeína",
+            "price": 100,
+            "description": "Alivia tosse."
+        },
+        "carvao": {
+            "name": "Carvão Ativado",
+            "price": 150,
+            "description": "Cura intoxicação."
+        },
+        "epinefrina": {
+            "name": "Epinefrina",
+            "price": 200,
+            "description": "Acorda desmaiados."
+        },
+        "morfina": {
+            "name": "Morfina",
+            "price": 200,
+            "description": "Permite andar quebrado."
+        },
+        "bolsa_sangue": {
+            "name": "Kit Bolsa de Sangue",
+            "price": 150,
+            "description": "Transfusão."
+        },
+        "pessego": {
+            "name": "Pêssegos em Calda",
+            "price": 50,
+            "description": "Comida e água."
+        },
+        "sardinha": {
+            "name": "Sardinha",
+            "price": 50,
+            "description": "Peixinho."
+        },
+        "agua": {
+            "name": "Garrafa de Água",
+            "price": 40,
+            "description": "Reutilizável."
+        },
+        "cantil": {
+            "name": "Cantil Militar",
+            "price": 100,
+            "description": "Durável."
+        },
+        "cloro": {
+            "name": "Pastilhas de Cloro",
+            "price": 100,
+            "description": "Purifica água suja."
+        }
+    },
+    "roupas": {
+        "mochila_campo": {
+            "name": "Mochila de Campo (Alice)",
+            "price": 600,
+            "description": "A maior mochila (90 slots)."
+        },
+        "mochila_montanha": {
+            "name": "Mochila de Montanha",
+            "price": 400,
+            "description": "Grande e visível (80 slots)."
+        },
+        "mochila_caça": {
+            "name": "Mochila de Caça",
+            "price": 350,
+            "description": "Discreta (63 slots)."
+        },
+        "traje_ghillie": {
+            "name": "Traje Ghillie Completo",
+            "price": 2000,
+            "description": "Invisibilidade na mata."
+        },
+        "capacete_tatico": {
+            "name": "Capacete Tático",
+            "price": 400,
+            "description": "Proteção e visão noturna."
+        },
+        "capacete_assalto": {
+            "name": "Capacete de Assalto",
+            "price": 500,
+            "description": "Proteção máxima com viseira."
+        },
+        "colete_plate": {
+            "name": "Colete Plate Carrier",
+            "price": 800,
+            "description": "Segura tiros de fuzil."
+        },
+        "colete_imprensa": {
+            "name": "Colete Press",
+            "price": 400,
+            "description": "Proteção média leve."
+        },
+        "cinto_tatico": {
+            "name": "Cinto Tático",
+            "price": 200,
+            "description": "Carrega coldre e faca."
+        }
+    },
+    "veiculos": {
+        "vela": {
+            "name": "Vela de Ignição",
+            "price": 300,
+            "description": "Essencial."
+        },
+        "radiador": {
+            "name": "Radiador",
+            "price": 400,
+            "description": "Refrigeração."
+        },
+        "luz_carro": {
+            "name": "Lâmpada de Farol",
+            "price": 100,
+            "description": "Para ver à noite."
+        },
+        "roda_gunter": {
+            "name": "Roda de Gunter",
+            "price": 300,
+            "description": "Hatchback."
+        },
+        "roda_ada": {
+            "name": "Roda de ADA 4x4",
+            "price": 350,
+            "description": "Niva."
+        },
+        "roda_olga": {
+            "name": "Roda de Olga",
+            "price": 300,
+            "description": "Sedan."
+        },
+        "roda_sarka": {
+            "name": "Roda de Sarka",
+            "price": 300,
+            "description": "Carro velho."
+        },
+        "roda_m3s": {
+            "name": "Roda de Caminhão M3S",
+            "price": 500,
+            "description": "Dupla."
+        },
+        "gasolina": {
+            "name": "Galão de Gasolina",
+            "price": 250,
+            "description": "Combustível."
+        },
+        "bateria_carro": {
+            "name": "Bateria de Carro",
+            "price": 500,
+            "description": "Energia."
+        },
+        "bateria_caminhao": {
+            "name": "Bateria de Caminhão",
+            "price": 600,
+            "description": "Para o V3S."
+        }
+    }
+}

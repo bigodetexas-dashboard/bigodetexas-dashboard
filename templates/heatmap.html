@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Calor - BigodeTexas</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">🤠 BigodeTexas</a>
+            <ul class="navbar-nav">
+                <li><a href="/" class="nav-link">Início</a></li>
+                <li><a href="/stats" class="nav-link">Estatísticas</a></li>
+                <li><a href="/leaderboard" class="nav-link">Ranking</a></li>
+                <li><a href="/shop" class="nav-link">Loja</a></li>
+                <li><a href="/heatmap" class="nav-link">Mapa de Calor</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="fade-in" style="margin-bottom: 1rem;">🗺️ Mapa de Calor PvP</h1>
+        <p class="text-secondary fade-in" style="margin-bottom: 2rem;">
+            Visualize as zonas mais quentes de combate no servidor.
+        </p>
+
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title">🔥 Heatmap</h3>
+            </div>
+            <div style="text-align: center; padding: 2rem;">
+                <img src="/heatmap.png" alt="Heatmap"
+                    style="max-width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-xl);"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display: none; color: var(--text-muted);">
+                    <p>⚠️ Nenhum dado de heatmap disponível ainda.</p>
+                    <p style="font-size: 0.875rem;">O heatmap será gerado após algumas mortes serem registradas.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card fade-in" style="margin-top: 2rem;">
+            <div class="card-header">
+                <h3 class="card-title">ℹ️ Como Funciona</h3>
+            </div>
+            <p class="text-secondary">
+                O mapa de calor mostra as áreas com maior atividade de PvP.
+                Pontos vermelhos indicam locais onde ocorreram mortes recentemente.
+                Use essas informações para evitar ou procurar combate!
+            </p>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+
+</html>

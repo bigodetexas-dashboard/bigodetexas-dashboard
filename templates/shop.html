@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja - BigodeTexas</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">🤠 BigodeTexas</a>
+            <ul class="navbar-nav">
+                <li><a href="/" class="nav-link">Início</a></li>
+                <li><a href="/stats" class="nav-link">Estatísticas</a></li>
+                <li><a href="/leaderboard" class="nav-link">Ranking</a></li>
+                <li><a href="/shop" class="nav-link">Loja</a></li>
+                <li><a href="/heatmap" class="nav-link">Mapa de Calor</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="fade-in" style="margin-bottom: 1rem;">🛒 Loja</h1>
+        <p class="text-secondary fade-in" style="margin-bottom: 2rem;">
+            Use o comando <code
+                style="background: rgba(245,158,11,0.1); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">!comprar &lt;codigo&gt;</code>
+            no Discord para adquirir itens.
+        </p>
+
+        <div id="shop-container" class="grid grid-3">
+            <div class="loading text-center">Carregando...</div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        loadShop();
+    </script>
+</body>
+
+</html>

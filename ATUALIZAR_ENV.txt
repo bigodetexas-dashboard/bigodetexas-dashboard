@@ -1,0 +1,53 @@
+# =====================================================
+# INSTRUCOES: Copie o conteudo abaixo para seu .env
+# =====================================================
+
+# ===== DISCORD BOT =====
+DISCORD_TOKEN=seu_token_do_bot_aqui
+ADMIN_PASSWORD=sua_senha_admin_segura
+
+# ===== DISCORD OAUTH (Dashboard) - CONFIGURADO =====
+DISCORD_CLIENT_ID=1442959269141020892
+DISCORD_CLIENT_SECRET=iw9RzpjUTvU5R0_cmzBiVzYPnldCNOJS
+DISCORD_REDIRECT_URI=http://localhost:5000/callback
+SECRET_KEY=4ba0cf9c9cbfe18a82202b546f497c7d4d449d6e73b3fdf45503ebb8d1d5547e
+
+# ===== PUSH NOTIFICATIONS =====
+# Crie um webhook no Discord e cole a URL aqui
+NOTIFICATION_WEBHOOK_URL=https://discord.com/api/webhooks/SEU_WEBHOOK_AQUI
+
+# ===== FTP NITRADO =====
+FTP_HOST=seu_host.nitrado.net
+FTP_PORT=21
+FTP_USER=seu_usuario_ftp
+FTP_PASS=sua_senha_ftp
+
+# ===== NITRADO API =====
+NITRADO_TOKEN=seu_token_nitrado_api
+SERVER_ID=seu_server_id
+
+# ===== DASHBOARD =====
+DASHBOARD_PORT=5000
+DASHBOARD_HOST=0.0.0.0
+
+# ===== SEGURANCA =====
+ADMIN_WHITELIST=123456789,987654321
+RATE_LIMIT_ENABLED=true
+
+# ===== CONFIGURACOES OPCIONAIS =====
+DEBUG_MODE=false
+LOG_LEVEL=INFO
+
+# =====================================================
+# CREDENCIAIS JA CONFIGURADAS:
+# =====================================================
+# - Discord OAuth Client ID: 1442959269141020892
+# - Discord OAuth Client Secret: iw9RzpjUTvU5R0_cmzBiVzYPnldCNOJS
+# - Secret Key: 4ba0cf9c9cbfe18a82202b546f497c7d4d449d6e73b3fdf45503ebb8d1d5547e
+# - Redirect URI: http://localhost:5000/callback
+#
+# AINDA PRECISA CONFIGURAR:
+# - DISCORD_TOKEN (token do seu bot)
+# - NOTIFICATION_WEBHOOK_URL (webhook para notificacoes)
+# - Credenciais FTP e Nitrado (se ainda nao tiver)
+# =====================================================

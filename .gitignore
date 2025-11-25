@@ -1,0 +1,36 @@
+# Arquivos de ambiente
+.env
+
+# Arquivos Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Dados sensíveis
+*.json.backup
+*.log
+*.db
+players_db.json
+economy.json
+clans.json
+bot_state.json
+links.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+backups/
+*.bak

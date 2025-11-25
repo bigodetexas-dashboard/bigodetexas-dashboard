@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - {{ player_name }} - BigodeTexas</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">🤠 BigodeTexas</a>
+            <ul class="navbar-nav">
+                <li><a href="/" class="nav-link">Início</a></li>
+                <li><a href="/stats" class="nav-link">Estatísticas</a></li>
+                <li><a href="/leaderboard" class="nav-link">Ranking</a></li>
+                <li><a href="/shop" class="nav-link">Loja</a></li>
+                <li><a href="/heatmap" class="nav-link">Mapa de Calor</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+            <a href="/leaderboard" style="color: var(--text-secondary); text-decoration: none;">← Voltar</a>
+            <h1 class="fade-in" id="player-name-title" style="margin: 0;">Carregando...</h1>
+        </div>
+
+        <!-- Player Stats Cards -->
+        <div class="grid grid-4" id="player-stats">
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="player-kills">-</div>
+                <div class="stat-label">💀 Kills</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="player-deaths">-</div>
+                <div class="stat-label">⚰️ Deaths</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="player-kd">-</div>
+                <div class="stat-label">📊 K/D Ratio</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value" id="player-balance">-</div>
+                <div class="stat-label">💰 DZ Coins</div>
+            </div>
+        </div>
+
+        <!-- Detailed Stats -->
+        <div class="grid grid-2" style="margin-top: 3rem;">
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">🎯 Recordes</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
+                        <span>🔥 Melhor Killstreak</span>
+                        <strong id="player-streak">-</strong>
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-between; padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: var(--radius-md);">
+                        <span>🎯 Tiro Mais Longo</span>
+                        <strong id="player-shot">-</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">🔫 Armas Favoritas</h3>
+                </div>
+                <div id="weapons-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <p class="text-muted">Carregando...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements -->
+        <div class="card fade-in" style="margin-top: 2rem;">
+            <div class="card-header">
+                <h3 class="card-title">🏆 Conquistas</h3>
+            </div>
+            <div id="achievements-grid" class="grid grid-3">
+                <p class="text-muted">Carregando...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        const playerName = "{{ player_name }}";
+
+        async function loadPlayerProfile() {
+            const data = await fetchAPI(`player/${playerName}`);
+            if (!data) {
+                document.getElementById('player-name-title').textContent = 'Jogador não encontrado';
+                return;
+            }
+
+            // Update title
+            document.getElementById('player-name-title').textContent = `👤 ${data.name}`;
+
+            // Update stats
+            document.getElementById('player-kills').textContent = formatNumber(data.kills);
+            document.getElementById('player-deaths').textContent = formatNumber(data.deaths);
+            document.getElementById('player-kd').textContent = data.kd;
+            document.getElementById('player-balance').textContent = formatNumber(data.balance);
+            document.getElementById('player-streak').textContent = formatNumber(data.killstreak);
+            document.getElementById('player-shot').textContent = formatNumber(data.longest_shot) + 'm';
+
+            // Update weapons
+            const weaponsList = document.getElementById('weapons-list');
+            const weapons = Object.entries(data.weapons_stats || {})
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            if (weapons.length === 0) {
+                weaponsList.innerHTML = '<p class="text-muted">Nenhuma arma registrada ainda</p>';
+            } else {
+                weaponsList.innerHTML = weapons.map(([weapon, kills]) => `
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: var(--radius-sm);">
+                        <span>${weapon}</span>
+                        <span class="badge badge-primary">${kills} kills</span>
+                    </div>
+                `).join('');
+            }
+
+            // Update achievements
+            const achievementsGrid = document.getElementById('achievements-grid');
+            const achievements = data.achievements || {};
+            const achievementsList = [
+                { id: 'first_kill', name: '🎯 Primeira Vítima', desc: 'Mate seu primeiro jogador' },
+                { id: 'assassin', name: '💀 Assassino', desc: 'Acumule 10 kills' },
+                { id: 'serial_killer', name: '☠️ Serial Killer', desc: 'Acumule 50 kills' },
+                { id: 'rich', name: '💰 Rico', desc: 'Acumule 10.000 DZ Coins' },
+                { id: 'millionaire', name: '💎 Milionário', desc: 'Acumule 100.000 DZ Coins' },
+                { id: 'shopper', name: '🛒 Comprador', desc: 'Faça 10 compras' }
+            ];
+
+            achievementsGrid.innerHTML = achievementsList.map(ach => {
+                const unlocked = achievements[ach.id]?.unlocked;
+                return `
+                    <div class="card" style="opacity: ${unlocked ? '1' : '0.5'}; padding: 1rem;">
+                        <div style="font-size: 2rem; text-align: center; margin-bottom: 0.5rem;">
+                            ${unlocked ? '✅' : '🔒'}
+                        </div>
+                        <h4 style="text-align: center; margin-bottom: 0.25rem; font-size: 1rem;">${ach.name}</h4>
+                        <p class="text-muted" style="text-align: center; font-size: 0.75rem; margin: 0;">${ach.desc}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        loadPlayerProfile();
+    </script>
+</body>
+
+</html>
