@@ -183,6 +183,11 @@ def stats():
 def shop():
     return render_template('store.html')
 
+@dashboard_bp.route('/loja')
+@login_required
+def loja():
+    return render_template('loja.html')
+
 @dashboard_bp.route('/leaderboard')
 @login_required
 def leaderboard():
