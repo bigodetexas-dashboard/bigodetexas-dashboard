@@ -1,1 +1,1 @@
-web: gunicorn dashboard_with_oauth:app
+web: python bot_main.py
