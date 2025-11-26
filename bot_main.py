@@ -23,6 +23,7 @@ from security import (
     backup_manager,
     AdminWhitelist
 )
+import database
 
 # Carregar variáveis de ambiente
 load_dotenv()
@@ -120,7 +121,7 @@ def health():
     return "OK", 200
 
 import threading
-threading.Thread(target=lambda: health_app.run(host="0.0.0.0", port=3000), daemon=True).start()
+threading.Thread(target=lambda: health_app.run(host="0.0.0.0", port=int(os.getenv("PORT", 3000))), daemon=True).start()
 
 # --- CLASSE DE PAGINAÇÃO INTERATIVA ---
 class ShopPaginator(discord.ui.View):
@@ -242,59 +243,66 @@ def require_admin_password():
 
 # --- SISTEMA DE ECONOMIA ---
 def get_balance(user_id):
-    eco = load_json(ECONOMY_FILE)
-    return eco.get(str(user_id), {}).get("balance", 0)
+    eco = database.get_economy(user_id)
+    return eco.get("balance", 0) if eco else 0
 
 def update_balance(user_id, amount, transaction_type="other", details=""):
-    eco = load_json(ECONOMY_FILE)
     user_id = str(user_id)
-    if user_id not in eco:
-        eco[user_id] = {"balance": 0, "last_daily": None, "inventory": {}, "transactions": [], "gamertag": None, "favorites": []}
+    eco = database.get_economy(user_id)
     
-    # Garante campos novos para retrocompatibilidade
-    if "transactions" not in eco[user_id]: eco[user_id]["transactions"] = []
-    if "gamertag" not in eco[user_id]: eco[user_id]["gamertag"] = None
-    if "favorites" not in eco[user_id]: eco[user_id]["favorites"] = []
+    if not eco:
+        eco = {"discord_id": user_id, "balance": 0, "transactions": []}
     
     # PROTEÇÃO: Não permite saldo negativo
-    new_balance = eco[user_id]["balance"] + amount
+    new_balance = eco.get("balance", 0) + amount
     if new_balance < 0:
-        print(f"[AVISO] Tentativa de saldo negativo bloqueada para user {user_id}: {eco[user_id]['balance']} + {amount} = {new_balance}")
-        new_balance = 0  # Reseta para 0 ao invés de permitir negativo
+        print(f"[AVISO] Tentativa de saldo negativo bloqueada para user {user_id}: {eco.get('balance', 0)} + {amount} = {new_balance}")
+        new_balance = 0
     
-    eco[user_id]["balance"] = new_balance
+    eco["balance"] = new_balance
     
     # Registra transação
-    eco[user_id]["transactions"].append({
+    transactions = eco.get("transactions", [])
+    if isinstance(transactions, str): # Handle JSON string if needed
+        try: transactions = json.loads(transactions)
+        except: transactions = []
+        
+    transactions.append({
         "type": transaction_type,
         "amount": amount,
         "details": details,
         "timestamp": datetime.now().isoformat(),
-        "balance_after": eco[user_id]["balance"]
+        "balance_after": new_balance
     })
     
     # Mantém apenas últimas 50 transações
-    if len(eco[user_id]["transactions"]) > 50:
-        eco[user_id]["transactions"] = eco[user_id]["transactions"][-50:]
+    if len(transactions) > 50:
+        transactions = transactions[-50:]
     
-    save_json(ECONOMY_FILE, eco)
-    return eco[user_id]["balance"]
+    eco["transactions"] = transactions
+    
+    database.save_economy(user_id, eco)
+    return new_balance
 
 def add_to_inventory(user_id, item_key, item_name):
-    eco = load_json(ECONOMY_FILE)
     user_id = str(user_id)
-    if user_id not in eco:
-        eco[user_id] = {"balance": 0, "last_daily": None, "inventory": {}}
+    eco = database.get_economy(user_id)
     
-    if "inventory" not in eco[user_id]:
-        eco[user_id]["inventory"] = {}
+    if not eco:
+        eco = {"discord_id": user_id, "balance": 0, "inventory": {}}
+        
+    inventory = eco.get("inventory", {})
+    if isinstance(inventory, str):
+        try: inventory = json.loads(inventory)
+        except: inventory = {}
 
-    if item_key in eco[user_id]["inventory"]:
-        eco[user_id]["inventory"][item_key]["count"] += 1
+    if item_key in inventory:
+        inventory[item_key]["count"] += 1
     else:
-        eco[user_id]["inventory"][item_key] = {"name": item_name, "count": 1}
+        inventory[item_key] = {"name": item_name, "count": 1}
     
-    save_json(ECONOMY_FILE, eco)
+    eco["inventory"] = inventory
+    database.save_economy(user_id, eco)
 
 # --- SISTEMA DE LOJA ---
 def find_item_by_key(key):
@@ -459,20 +467,23 @@ ACHIEVEMENTS_DEF = {
 
 def check_achievements(user_id):
     """Verifica e desbloqueia conquistas para um jogador"""
-    eco = load_json(ECONOMY_FILE)
     uid = str(user_id)
+    eco = database.get_economy(uid)
     
-    if uid not in eco:
+    if not eco:
         return []
     
-    if "achievements" not in eco[uid]:
-        eco[uid]["achievements"] = {}
+    achievements = eco.get("achievements", {})
+    if isinstance(achievements, str):
+        try: achievements = json.loads(achievements)
+        except: achievements = {}
     
     # Dados do jogador para verificação
+    gamertag = eco.get("gamertag", "")
     player_data = {
-        "kills": get_player_stats(eco[uid].get("gamertag", "")).get("kills", 0) if eco[uid].get("gamertag") else 0,
-        "balance": eco[uid].get("balance", 0),
-        "purchases": sum(1 for t in eco[uid].get("transactions", []) if t.get("type") == "purchase"),
+        "kills": database.get_player(gamertag).get("kills", 0) if gamertag else 0,
+        "balance": eco.get("balance", 0),
+        "purchases": sum(1 for t in eco.get("transactions", []) if isinstance(t, dict) and t.get("type") == "purchase"),
         "hours_played": 0,  # TODO: calcular do players_db
         "clan_created": False  # TODO: verificar se é líder de clã
     }
@@ -481,48 +492,48 @@ def check_achievements(user_id):
     
     for ach_id, ach_def in ACHIEVEMENTS_DEF.items():
         # Se já desbloqueou, pula
-        if eco[uid]["achievements"].get(ach_id, {}).get("unlocked"):
+        if achievements.get(ach_id, {}).get("unlocked"):
             continue
         
         # Verifica condição
         if ach_def["check"](player_data):
-            eco[uid]["achievements"][ach_id] = {
+            achievements[ach_id] = {
                 "unlocked": True,
                 "date": datetime.now().isoformat()
             }
             
             # Dá recompensa
             if ach_def["reward"] > 0:
-                eco[uid]["balance"] += ach_def["reward"]
+                eco["balance"] = eco.get("balance", 0) + ach_def["reward"]
             
             newly_unlocked.append((ach_id, ach_def))
     
-    save_json(ECONOMY_FILE, eco)
+    eco["achievements"] = achievements
+    database.save_economy(uid, eco)
     return newly_unlocked
 
 # --- SISTEMA DE VÍNCULO (LINKING) ---
 def get_discord_id_by_gamertag(gamertag):
-    links = load_json(LINKS_FILE)
-    # Busca case-insensitive
-    for gt, did in links.items():
-        if gt.lower() == gamertag.lower():
-            return did
-    return None
+    return database.get_link_by_gamertag(gamertag)
 
 # --- SISTEMA DE CLÃS (WARS) ---
 def get_user_clan(user_id):
     """Retorna a tag do clã e os dados do clã do usuário."""
-    clans = load_json(CLANS_FILE)
+    clans = database.get_all_clans()
     uid = str(user_id)
     
     for tag, data in clans.items():
-        if data.get("leader") == uid or uid in data.get("members", []):
+        members = data.get("members", [])
+        if isinstance(members, str):
+            try: members = json.loads(members)
+            except: members = []
+            
+        if data.get("leader") == uid or uid in members:
             return tag, data
     return None, None
 
 def get_clan_by_tag(tag):
-    clans = load_json(CLANS_FILE)
-    return clans.get(tag.upper())
+    return database.get_clan(tag.upper())
 
 def update_war_score(killer_name, victim_name):
     """Verifica se há guerra entre os clãs e atualiza o placar."""
@@ -538,79 +549,63 @@ def update_war_score(killer_name, victim_name):
     if not k_tag or not v_tag or k_tag == v_tag:
         return None
         
-    clans = load_json(CLANS_FILE)
-    
-    # Verifica se há guerra ativa
-    wars = clans.get("wars", {})
-    war_id = None
-    
-    for wid, wdata in wars.items():
-        if not wdata.get("active"): continue
-        
-        participants = [wdata["clan1"], wdata["clan2"]]
-        if k_tag in participants and v_tag in participants:
-            war_id = wid
-            break
-            
-    if war_id:
-        # Atualiza placar
-        wars[war_id]["score"][k_tag] += 1
-        clans["wars"] = wars
-        save_json(CLANS_FILE, clans)
-        
-        return {
-            "war_id": war_id,
-            "clan1": wars[war_id]["clan1"],
-            "clan2": wars[war_id]["clan2"],
-            "score": wars[war_id]["score"],
-            "killer_clan": k_tag
-        }
+    # TODO: Implement War System in Database
+    # For now, we skip war updates as it requires a new table or complex JSON structure
     return None
 
 # --- SISTEMA DE STATS (KILLFEED) ---
 def get_player_stats(db, player_name):
-    if player_name not in db:
-        db[player_name] = {
+    # db argument is ignored in favor of database call, kept for compatibility if needed
+    player = database.get_player(player_name)
+    if not player:
+        player = {
+            "gamertag": player_name,
             "kills": 0, "deaths": 0, "killstreak": 0, "best_killstreak": 0,
             "last_death_time": time.time(), "first_seen": time.time(),
             "longest_shot": 0, "weapons_stats": {}, "total_playtime": 0
         }
-    # Garante retrocompatibilidade para campos novos
-    if "longest_shot" not in db[player_name]: db[player_name]["longest_shot"] = 0
-    if "weapons_stats" not in db[player_name]: db[player_name]["weapons_stats"] = {}
     
-    return db[player_name]
+    # Ensure JSON fields are parsed
+    if isinstance(player.get("weapons_stats"), str):
+        try: player["weapons_stats"] = json.loads(player["weapons_stats"])
+        except: player["weapons_stats"] = {}
+        
+    return player
 
 def update_stats_db(killer_name, victim_name, weapon=None, distance=0):
-    db = load_json(PLAYERS_DB_FILE)
     current_time = time.time()
     
     # Matador
-    killer = get_player_stats(db, killer_name)
-    killer["kills"] += 1
-    killer["killstreak"] += 1
-    if killer["killstreak"] > killer["best_killstreak"]:
+    killer = get_player_stats(None, killer_name)
+    killer["kills"] = killer.get("kills", 0) + 1
+    killer["killstreak"] = killer.get("killstreak", 0) + 1
+    if killer["killstreak"] > killer.get("best_killstreak", 0):
         killer["best_killstreak"] = killer["killstreak"]
         
     # Longest Shot
-    if distance > killer["longest_shot"]:
+    if distance > killer.get("longest_shot", 0):
         killer["longest_shot"] = int(distance)
         
     # Weapon Stats
     if weapon:
         w_key = weapon.replace('"', '').strip()
-        if w_key not in killer["weapons_stats"]:
-            killer["weapons_stats"][w_key] = 0
-        killer["weapons_stats"][w_key] += 1
+        weapons_stats = killer.get("weapons_stats", {})
+        if w_key not in weapons_stats:
+            weapons_stats[w_key] = 0
+        weapons_stats[w_key] += 1
+        killer["weapons_stats"] = weapons_stats
+    
+    database.save_player(killer_name, killer)
     
     # Vítima
-    victim = get_player_stats(db, victim_name)
-    victim["deaths"] += 1
+    victim = get_player_stats(None, victim_name)
+    victim["deaths"] = victim.get("deaths", 0) + 1
     victim["killstreak"] = 0
     time_alive = int(current_time - victim.get("last_death_time", current_time))
     victim["last_death_time"] = current_time
     
-    save_json(PLAYERS_DB_FILE, db)
+    database.save_player(victim_name, victim)
+    
     return killer, victim, time_alive
 
 def format_time(seconds):
