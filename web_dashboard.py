@@ -7,6 +7,7 @@ import database  # Importar módulo de banco de dados
 
 # Blueprint definition
 dashboard_bp = Blueprint('dashboard', __name__)
+# Force redeploy v2
 
 def load_json(filename):
     if not os.path.exists(filename):
