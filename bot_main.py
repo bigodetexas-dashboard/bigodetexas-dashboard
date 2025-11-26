@@ -113,14 +113,27 @@ intents = discord.Intents.default()
 intents.message_content = True 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# --- HEALTH CHECK ENDPOINT ---
-health_app = Flask(__name__)
+# --- DASHBOARD & WEB SERVER ---
+from web_dashboard import dashboard_bp
+from discord_oauth import init_oauth
 
+# Inicializar Flask App
+health_app = Flask(__name__)
+health_app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key") # Importante para sessões
+
+# Inicializar OAuth
+init_oauth(health_app)
+
+# Registrar Blueprint do Dashboard
+health_app.register_blueprint(dashboard_bp)
+
+# Rota de Health Check (mantida para compatibilidade)
 @health_app.route("/health")
 def health():
     return "OK", 200
 
 import threading
+# Rodar o servidor web em uma thread separada
 threading.Thread(target=lambda: health_app.run(host="0.0.0.0", port=int(os.getenv("PORT", 3000))), daemon=True).start()
 
 # --- CLASSE DE PAGINAÇÃO INTERATIVA ---
