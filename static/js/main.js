@@ -128,6 +128,60 @@ function copyCommand(code) {
   });
 }
 
+// --- LEADERBOARD PAGE ---
+async function loadLeaderboard() {
+  const data = await fetchAPI('leaderboard');
+  if (!data) return;
+
+  // Top Kills
+  const topKills = document.getElementById('top-kills');
+  if (topKills) {
+    topKills.innerHTML = data.kills.map((player, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${player.name}</td>
+        <td>${formatNumber(player.value)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Top K/D
+  const topKd = document.getElementById('top-kd');
+  if (topKd) {
+    topKd.innerHTML = data.kd.map((player, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${player.name}</td>
+        <td>${player.value.toFixed(2)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Top Killstreak
+  const topStreak = document.getElementById('top-streak');
+  if (topStreak) {
+    topStreak.innerHTML = data.killstreak.map((player, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${player.name}</td>
+        <td>${formatNumber(player.value)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Top Longest Shot
+  const topShot = document.getElementById('top-shot');
+  if (topShot) {
+    topShot.innerHTML = data.longest_shot.map((player, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${player.name}</td>
+        <td>${formatNumber(player.value)}m</td>
+      </tr>
+    `).join('');
+  }
+}
+
 // --- WARS PAGE ---
 async function loadWars() {
   const wars = await fetchAPI('wars');
