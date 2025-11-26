@@ -7,54 +7,84 @@ let currentCategory = 'armas';
 
 // Initialize shop
 async function initShop() {
-    // Load items
-    const items = await fetchAPI('shop');
-    if (!items) return;
+  console.log('[DEBUG] initShop started');
 
-    allShopItems = items;
+  // Load items
+  console.log('[DEBUG] Fetching shop items...');
+  const items = await fetchAPI('shop');
+  console.log('[DEBUG] Shop items response:', items);
 
-    // Load user balance
-    const balanceData = await fetchAPI('user/balance');
-    if (balanceData) {
-        userBalance = balanceData.balance;
-        document.getElementById('user-balance').textContent = `${formatNumber(userBalance)} 💰`;
+  if (!items) {
+    console.error('[DEBUG] Failed to load shop items');
+    document.getElementById('items-container').innerHTML = '<p class="text-center text-danger">Erro ao carregar itens. Verifique o console.</p>';
+    return;
+  }
+
+  allShopItems = items;
+  console.log(`[DEBUG] Loaded ${items.length} items`);
+
+  // Load user balance
+  console.log('[DEBUG] Fetching user balance...');
+  const balanceData = await fetchAPI('user/balance');
+  console.log('[DEBUG] User balance response:', balanceData);
+
+  if (balanceData) {
+    userBalance = balanceData.balance;
+    const balanceEl = document.getElementById('user-balance');
+    if (balanceEl) {
+      balanceEl.textContent = `${formatNumber(userBalance)} 💰`;
     }
-
-    // Load cart from localStorage
-    const savedCart = localStorage.getItem('bigode_cart');
-    if (savedCart) {
-        cart = JSON.parse(savedCart);
+  } else {
+    console.warn('[DEBUG] Could not fetch balance (user might be logged out)');
+    const balanceEl = document.getElementById('user-balance');
+    if (balanceEl) {
+      balanceEl.textContent = 'Faça Login';
     }
+  }
 
-    // Display initial category
-    selectCategory('armas');
-    updateCart();
+  // Load cart from localStorage
+  const savedCart = localStorage.getItem('bigode_cart');
+  if (savedCart) {
+    try {
+      cart = JSON.parse(savedCart);
+      console.log(`[DEBUG] Loaded ${cart.length} items from cart`);
+    } catch (e) {
+      console.error('[DEBUG] Error parsing cart:', e);
+      cart = [];
+    }
+  }
+
+  // Display initial category
+  console.log('[DEBUG] Selecting initial category: armas');
+  selectCategory('armas');
+  updateCart();
+  console.log('[DEBUG] initShop completed');
 }
 
 // Select category
 function selectCategory(category) {
-    currentCategory = category;
+  currentCategory = category;
 
-    // Update active tab
-    document.querySelectorAll('.category-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelector(`[data-category="${category}"]`).classList.add('active');
+  // Update active tab
+  document.querySelectorAll('.category-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  document.querySelector(`[data-category="${category}"]`).classList.add('active');
 
-    // Filter and display items
-    const filtered = allShopItems.filter(item => item.category === category);
-    renderItems(filtered);
+  // Filter and display items
+  const filtered = allShopItems.filter(item => item.category === category);
+  renderItems(filtered);
 }
 
 // Render items
 function renderItems(items) {
-    const container = document.getElementById('items-container');
-    if (!items || items.length === 0) {
-        container.innerHTML = '<p class="text-muted text-center">Nenhum item nesta categoria</p>';
-        return;
-    }
+  const container = document.getElementById('items-container');
+  if (!items || items.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center">Nenhum item nesta categoria</p>';
+    return;
+  }
 
-    container.innerHTML = items.map(item => `
+  container.innerHTML = items.map(item => `
     <div class="card fade-in">
       <div class="card-header">
         <h3 class="card-title">${item.name}</h3>
@@ -78,61 +108,61 @@ function renderItems(items) {
 
 // Add to cart
 function addToCart(code) {
-    const item = allShopItems.find(i => i.code === code);
-    if (!item) return;
+  const item = allShopItems.find(i => i.code === code);
+  if (!item) return;
 
-    // Check if already in cart
-    const existing = cart.find(c => c.code === code);
-    if (existing) {
-        existing.quantity += 1;
-    } else {
-        cart.push({
-            code: item.code,
-            name: item.name,
-            price: item.price,
-            quantity: 1
-        });
-    }
+  // Check if already in cart
+  const existing = cart.find(c => c.code === code);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({
+      code: item.code,
+      name: item.name,
+      price: item.price,
+      quantity: 1
+    });
+  }
 
-    updateCart();
+  updateCart();
 
-    // Visual feedback
-    const btn = event.target;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '✅ Adicionado!';
-    btn.style.background = 'rgba(34, 197, 94, 0.2)';
-    setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.style.background = '';
-    }, 1000);
+  // Visual feedback
+  const btn = event.target;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '✅ Adicionado!';
+  btn.style.background = 'rgba(34, 197, 94, 0.2)';
+  setTimeout(() => {
+    btn.innerHTML = originalText;
+    btn.style.background = '';
+  }, 1000);
 }
 
 // Remove from cart
 function removeFromCart(code) {
-    cart = cart.filter(item => item.code !== code);
-    updateCart();
+  cart = cart.filter(item => item.code !== code);
+  updateCart();
 }
 
 // Update cart display
 function updateCart() {
-    // Save to localStorage
-    localStorage.setItem('bigode_cart', JSON.stringify(cart));
+  // Save to localStorage
+  localStorage.setItem('bigode_cart', JSON.stringify(cart));
 
-    // Update cart display
-    const cartItems = document.getElementById('cart-items');
-    const cartTotal = document.getElementById('cart-total');
-    const checkoutBtn = document.getElementById('checkout-btn');
+  // Update cart display
+  const cartItems = document.getElementById('cart-items');
+  const cartTotal = document.getElementById('cart-total');
+  const checkoutBtn = document.getElementById('checkout-btn');
 
-    if (cart.length === 0) {
-        cartItems.innerHTML = '<p class="text-muted text-center">Carrinho vazio</p>';
-        cartTotal.textContent = '0 💰';
-        checkoutBtn.disabled = true;
-        document.getElementById('balance-status').innerHTML = '';
-        return;
-    }
+  if (cart.length === 0) {
+    cartItems.innerHTML = '<p class="text-muted text-center">Carrinho vazio</p>';
+    cartTotal.textContent = '0 💰';
+    checkoutBtn.disabled = true;
+    document.getElementById('balance-status').innerHTML = '';
+    return;
+  }
 
-    // Render cart items
-    cartItems.innerHTML = cart.map(item => `
+  // Render cart items
+  cartItems.innerHTML = cart.map(item => `
     <div class="cart-item">
       <div>
         <div style="font-weight: 600;">${item.name}</div>
@@ -146,68 +176,68 @@ function updateCart() {
     </div>
   `).join('');
 
-    // Calculate total
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    cartTotal.textContent = `${formatNumber(total)} 💰`;
+  // Calculate total
+  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  cartTotal.textContent = `${formatNumber(total)} 💰`;
 
-    // Validate balance
-    validateBalance(total);
+  // Validate balance
+  validateBalance(total);
 }
 
 // Validate balance
 function validateBalance(total) {
-    const balanceStatus = document.getElementById('balance-status');
-    const checkoutBtn = document.getElementById('checkout-btn');
+  const balanceStatus = document.getElementById('balance-status');
+  const checkoutBtn = document.getElementById('checkout-btn');
 
-    if (total > userBalance) {
-        const deficit = total - userBalance;
-        balanceStatus.innerHTML = `
+  if (total > userBalance) {
+    const deficit = total - userBalance;
+    balanceStatus.innerHTML = `
       <div class="balance-warning">
         ⚠️ Saldo Insuficiente!<br>
         Faltam: ${formatNumber(deficit)} 💰
       </div>
     `;
-        checkoutBtn.disabled = true;
-    } else {
-        balanceStatus.innerHTML = `
+    checkoutBtn.disabled = true;
+  } else {
+    balanceStatus.innerHTML = `
       <div class="balance-ok">
         ✅ Saldo Suficiente
       </div>
     `;
-        checkoutBtn.disabled = false;
-    }
+    checkoutBtn.disabled = false;
+  }
 }
 
 // Checkout
 async function checkout() {
-    if (cart.length === 0) return;
+  if (cart.length === 0) return;
 
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    // Final balance check
-    if (total > userBalance) {
-        alert('⚠️ Saldo insuficiente! Remova alguns itens do carrinho.');
-        return;
-    }
+  // Final balance check
+  if (total > userBalance) {
+    alert('⚠️ Saldo insuficiente! Remova alguns itens do carrinho.');
+    return;
+  }
 
-    // Ask for coordinates
-    const coords = prompt('📍 Digite as coordenadas de entrega (formato: X Z):\nExemplo: 4500 10200');
+  // Ask for coordinates
+  const coords = prompt('📍 Digite as coordenadas de entrega (formato: X Z):\nExemplo: 4500 10200');
 
-    if (!coords) {
-        return; // User cancelled
-    }
+  if (!coords) {
+    return; // User cancelled
+  }
 
-    // Validate coordinates format
-    if (!coords.match(/^\d+\s+\d+$/)) {
-        alert('⚠️ Formato inválido! Use: X Z (exemplo: 4500 10200)');
-        return;
-    }
+  // Validate coordinates format
+  if (!coords.match(/^\d+\s+\d+$/)) {
+    alert('⚠️ Formato inválido! Use: X Z (exemplo: 4500 10200)');
+    return;
+  }
 
-    // TODO: Send bulk purchase to backend
-    // For now, show success message
-    alert(`✅ Compra realizada com sucesso!\n\nTotal: ${formatNumber(total)} 💰\nItens: ${cart.length}\nLocal: ${coords}\n\nOs itens serão entregues em breve!`);
+  // TODO: Send bulk purchase to backend
+  // For now, show success message
+  alert(`✅ Compra realizada com sucesso!\n\nTotal: ${formatNumber(total)} 💰\nItens: ${cart.length}\nLocal: ${coords}\n\nOs itens serão entregues em breve!`);
 
-    // Clear cart
-    cart = [];
-    updateCart();
+  // Clear cart
+  cart = [];
+  updateCart();
 }
