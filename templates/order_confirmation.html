@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido Confirmado - BigodeTexas</title>
+    <link rel="stylesheet" href="/static/css/shop.css">
+    <link rel="stylesheet" href="/static/css/confirmation.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="confirmation-container">
+        <div class="success-animation">
+            <div class="checkmark-circle">
+                <i class="fas fa-check"></i>
+            </div>
+        </div>
+
+        <h1 class="success-title">Pedido Realizado com Sucesso!</h1>
+        <p class="success-subtitle">Seus itens serão entregues em <strong>5 minutos</strong></p>
+
+        <div class="order-details">
+            <div class="detail-card">
+                <i class="fas fa-hashtag"></i>
+                <div>
+                    <span class="detail-label">ID do Pedido</span>
+                    <span class="detail-value" id="order-id">-</span>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                    <span class="detail-label">Local de Entrega</span>
+                    <span class="detail-value" id="delivery-location">-</span>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <span class="detail-label">Tempo Estimado</span>
+                    <span class="detail-value countdown" id="countdown">5:00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-preview">
+            <h3><i class="fas fa-map"></i> Local de Entrega</h3>
+            <div class="mini-map" id="mini-map">
+                <div class="map-marker-preview" id="map-marker-preview">
+                    <i class="fas fa-map-pin"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-primary" onclick="window.location.href='/shop'">
+                <i class="fas fa-shopping-cart"></i>
+                Continuar Comprando
+            </button>
+            <button class="btn-secondary" onclick="window.location.href='/'">
+                <i class="fas fa-home"></i>
+                Voltar ao Início
+            </button>
+        </div>
+
+        <div class="delivery-info">
+            <i class="fas fa-info-circle"></i>
+            <p>Os itens aparecerão no chão nas coordenadas selecionadas. Certifique-se de estar próximo ao local de
+                entrega!</p>
+        </div>
+    </div>
+
+    <script src="/static/js/confirmation.js"></script>
+</body>
+
+</html>

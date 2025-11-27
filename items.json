@@ -270,6 +270,58 @@
             "name": "Cinta de Cabeça NVG",
             "price": 200,
             "description": "Para usar o NVG sem capacete."
+        },
+        "faca": {
+            "name": "Faca Tática",
+            "price": 150,
+            "description": "Arma branca versátil."
+        },
+        "botijao": {
+            "name": "Botijão de Gás",
+            "price": 200,
+            "description": "Para fogões portáteis."
+        },
+        "panela": {
+            "name": "Panela de Cozinha",
+            "price": 100,
+            "description": "Cozinhe alimentos."
+        },
+        "lanterna": {
+            "name": "Lanterna",
+            "price": 150,
+            "description": "Ilumine o caminho."
+        }
+    },
+    "armadilhas": {
+        "bear_trap": {
+            "name": "Armadilha de Urso",
+            "price": 400,
+            "description": "Quebra pernas de inimigos."
+        },
+        "land_mine": {
+            "name": "Mina Terrestre",
+            "price": 800,
+            "description": "Explosão letal."
+        },
+        "tripwire": {
+            "name": "Armadilha de Arame",
+            "price": 300,
+            "description": "Ativa granadas."
+        },
+        "granada_frag": {
+            "name": "Granada de Fragmentação",
+            "price": 500,
+            "description": "Explosivo de mão."
+        },
+        "granada_flash": {
+            "name": "Granada Flashbang",
+            "price": 300,
+            "description": "Cega e ensurdece."
+        },
+        "granada_fumaca": {
+            "name": "Granada de Fumaça",
+            "price": 200,
+            "description": "Cortina de fumaça."
         }
     },
     "construcao": {
@@ -467,33 +519,18 @@
             "price": 150,
             "description": "Transfusão."
         },
-        "pessego": {
-            "name": "Pêssegos em Calda",
-            "price": 50,
-            "description": "Comida e água."
+        "kit_primeiros_socorros": {
+            "name": "Kit de Primeiros Socorros",
+            "price": 500,
+            "description": "Completo para emergências."
         },
-        "sardinha": {
-            "name": "Sardinha",
-            "price": 50,
-            "description": "Peixinho."
-        },
-        "agua": {
-            "name": "Garrafa de Água",
-            "price": 40,
-            "description": "Reutilizável."
-        },
-        "cantil": {
-            "name": "Cantil Militar",
-            "price": 100,
-            "description": "Durável."
-        },
-        "cloro": {
-            "name": "Pastilhas de Cloro",
-            "price": 100,
-            "description": "Purifica água suja."
+        "atadura": {
+            "name": "Atadura",
+            "price": 80,
+            "description": "Para sangramentos leves."
         }
     },
-    "roupas": {
+    "mochilas": {
         "mochila_campo": {
             "name": "Mochila de Campo (Alice)",
             "price": 600,
@@ -504,11 +541,23 @@
             "price": 400,
             "description": "Grande e visível (80 slots)."
         },
-        "mochila_caça": {
+        "mochila_caca": {
             "name": "Mochila de Caça",
             "price": 350,
             "description": "Discreta (63 slots)."
         },
+        "mochila_assalto": {
+            "name": "Mochila de Assalto",
+            "price": 500,
+            "description": "Tática militar (70 slots)."
+        },
+        "mochila_coiote": {
+            "name": "Mochila Coiote",
+            "price": 450,
+            "description": "Resistente (70 slots)."
+        }
+    },
+    "roupas": {
         "traje_ghillie": {
             "name": "Traje Ghillie Completo",
             "price": 2000,
@@ -538,6 +587,125 @@
             "name": "Cinto Tático",
             "price": 200,
             "description": "Carrega coldre e faca."
+        },
+        "jaqueta_gorka": {
+            "name": "Jaqueta Gorka Militar",
+            "price": 300,
+            "description": "Resistente e com bolsos."
+        },
+        "calca_gorka": {
+            "name": "Calça Gorka Militar",
+            "price": 250,
+            "description": "Durável e tática."
+        },
+        "botas_combate": {
+            "name": "Botas de Combate",
+            "price": 200,
+            "description": "Proteção e conforto."
+        }
+    },
+    "comidas": {
+        "pessego": {
+            "name": "Pêssegos em Calda",
+            "price": 50,
+            "description": "Comida e água."
+        },
+        "sardinha": {
+            "name": "Sardinha",
+            "price": 50,
+            "description": "Peixinho nutritivo."
+        },
+        "feijao": {
+            "name": "Feijão Enlatado",
+            "price": 50,
+            "description": "Proteína vegetal."
+        },
+        "bacon": {
+            "name": "Bacon Enlatado",
+            "price": 80,
+            "description": "Gordura e proteína."
+        },
+        "arroz": {
+            "name": "Arroz",
+            "price": 60,
+            "description": "Carboidrato essencial."
+        },
+        "maca": {
+            "name": "Maçã",
+            "price": 30,
+            "description": "Fruta fresca."
+        },
+        "pera": {
+            "name": "Pêra",
+            "price": 30,
+            "description": "Fruta doce."
+        },
+        "cogumelo": {
+            "name": "Cogumelos",
+            "price": 40,
+            "description": "Comestível (cuidado!)."
+        },
+        "agua": {
+            "name": "Garrafa de Água",
+            "price": 40,
+            "description": "Reutilizável."
+        },
+        "cantil": {
+            "name": "Cantil Militar",
+            "price": 100,
+            "description": "Durável."
+        },
+        "cloro": {
+            "name": "Pastilhas de Cloro",
+            "price": 100,
+            "description": "Purifica água suja."
+        }
+    },
+    "cacador": {
+        "faca_caca": {
+            "name": "Faca de Caça",
+            "price": 200,
+            "description": "Para esfolar animais."
+        },
+        "faca_combate": {
+            "name": "Faca de Combate",
+            "price": 250,
+            "description": "Arma branca letal."
+        },
+        "machete": {
+            "name": "Machete",
+            "price": 180,
+            "description": "Corta mato e inimigos."
+        },
+        "binoculos": {
+            "name": "Binóculos",
+            "price": 300,
+            "description": "Visão de longo alcance."
+        },
+        "rangefinder": {
+            "name": "Telêmetro",
+            "price": 500,
+            "description": "Mede distância exata."
+        },
+        "bussola": {
+            "name": "Bússola",
+            "price": 150,
+            "description": "Navegação precisa."
+        },
+        "isca": {
+            "name": "Isca de Pesca",
+            "price": 50,
+            "description": "Para pescar."
+        },
+        "anzol": {
+            "name": "Anzol",
+            "price": 30,
+            "description": "Pesca básica."
+        },
+        "rede_pesca": {
+            "name": "Rede de Pesca",
+            "price": 200,
+            "description": "Pesca múltipla."
         }
     },
     "veiculos": {

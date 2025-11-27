@@ -1,0 +1,2 @@
+# Adicione esta linha ao seu arquivo .env
+DATABASE_URL=postgresql://postgres.uvyhpedcgmroddvkngdl:Lissy%402000@aws-0-us-west-1.pooler.supabase.com:6543/postgres

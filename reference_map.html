@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DayZ Spawn Selector</title>
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #fff;
+        }
+        header {
+            background: #222;
+            padding: 15px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        #map {
+            width: 100%;
+            height: calc(100vh - 200px);
+        }
+        .panel {
+            padding: 20px;
+            background: #181818;
+            border-top: 2px solid #333;
+        }
+        .input-row {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+        }
+        button {
+            background: #28a745;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2ecc71;
+        }
+        .coords-display {
+            margin-top: 10px;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <header>DayZ Item Spawn Selector — Chernarus</header>
+
+    <div id="map"></div>
+
+    <div class="panel">
+        <div class="input-row">
+            <label>Item a spawnar:</label>
+            <input id="itemInput" type="text" placeholder="Ex: M4A1, FoodCan, Ammo556x45" />
+        </div>
+
+        <div class="coords-display">
+            Coordenadas selecionadas:<br>
+            <span id="coords">Nenhuma</span>
+        </div>
+
+        <button id="spawnBtn">Spawnar Item</button>
+    </div>
+
+    <script>
+        // Tamanho real da Chernarus (em metros)
+        const mapWidth = 15360;
+        const mapHeight = 15360;
+
+        const map = L.map('map', {
+            crs: L.CRS.Simple,
+            minZoom: -2,
+            maxZoom: 2
+        });
+
+        const southWest = [mapHeight, 0];
+        const northEast = [0, mapWidth];
+        const bounds = [southWest, northEast];
+
+        // ATENÇÃO: coloque seu arquivo de mapa em /assets/maps/chernarus.jpg
+        L.imageOverlay('assets/maps/chernarus.jpg', bounds).addTo(map);
+        map.fitBounds(bounds);
+
+        let selectedX = null;
+        let selectedY = null;
+        let marker = null;
+
+        map.on('click', function(e) {
+            const x = e.latlng.lng;
+            const y = mapHeight - e.latlng.lat;
+
+            selectedX = Math.round(x);
+            selectedY = Math.round(y);
+
+            if (marker) map.removeLayer(marker);
+            marker = L.marker(e.latlng).addTo(map);
+
+            document.getElementById('coords').innerText = `X: ${selectedX} | Y: ${selectedY}`;
+        });
+
+        function sendSpawnRequest() {
+            const item = document.getElementById('itemInput').value.trim();
+
+            if (!item) {
+                alert('Digite o nome do item.');
+                return;
+            }
+
+            if (selectedX === null || selectedY === null) {
+                alert('Selecione um local no mapa primeiro.');
+                return;
+            }
+
+            // Envia para o backend (o backend está configurado em /api/spawn-item)
+            fetch('/api/spawn-item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item, x: selectedX, y: selectedY, user: 'web' })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.ok) {
+                    alert('Pedido de spawn criado com sucesso! ID: ' + res.id);
+                } else {
+                    alert('Erro: ' + (res.error || 'Resposta inesperada'));
+                }
+            })
+            .catch(err => {
+                alert('Erro ao enviar pedido. Verifique o servidor: ' + err);
+            });
+        }
+
+        document.getElementById('spawnBtn').addEventListener('click', sendSpawnRequest);
+    </script>
+</body>
+</html>

@@ -110,8 +110,13 @@ def api_user_balance():
         return jsonify({'error': 'Not authenticated'}), 401
     
     economy = database.get_all_economy()
-    user_data = economy.get(str(user_id), {})
-    balance = user_data.get('balance', 0)
+    
+    # MODO DEV: Saldo infinito para testes
+    if user_id == '123456789':
+        balance = 999999
+    else:
+        user_data = economy.get(str(user_id), {})
+        balance = user_data.get('balance', 0)
     
     return jsonify({
         'balance': balance,
@@ -119,7 +124,7 @@ def api_user_balance():
     })
 
 @dashboard_bp.route('/api/shop/purchase', methods=['POST'])
-@login_required
+# @login_required  # Temporariamente desabilitado para teste
 def api_shop_purchase():
     from flask import session, request
     import asyncio
@@ -130,11 +135,13 @@ def api_shop_purchase():
         return jsonify({'error': 'Not authenticated'}), 401
     
     data = request.get_json()
+    print(f"DEBUG PURCHASE: Recebido: {data}") # DEBUG
     items = data.get('items', [])
     coordinates = data.get('coordinates', {})
     total = data.get('total', 0)
     
     if not items or not coordinates:
+        print(f"DEBUG PURCHASE: Dados inválidos! Items: {items}, Coords: {coordinates}") # DEBUG
         return jsonify({'error': 'Dados inválidos'}), 400
     
     # Verificar saldo
@@ -227,24 +234,6 @@ def api_player(name):
         'first_seen': stats.get('first_seen', 0)
     })
 
-@dashboard_bp.route('/api/user/balance')
-@login_required
-def api_user_balance():
-    """Returns the logged-in user's balance"""
-    from flask import session
-    discord_id = session.get('discord_id')
-    
-    if not discord_id:
-        return jsonify({'error': 'Not authenticated'}), 401
-    
-    eco_data = database.get_economy(str(discord_id))
-    balance = eco_data.get('balance', 0) if eco_data else 0
-    
-    return jsonify({
-        'balance': balance,
-        'discord_id': str(discord_id)
-    })
-
 
 # --- PAGES ---
 @dashboard_bp.route('/')
@@ -257,9 +246,24 @@ def stats():
     return render_template('stats.html')
 
 @dashboard_bp.route('/shop')
-@login_required
+# @login_required  # Temporariamente desabilitado para teste
 def shop():
+    return render_template('shop_ecommerce.html')
+
+@dashboard_bp.route('/shop-old')
+@login_required
+def shop_old():
     return render_template('shop_new.html')
+
+@dashboard_bp.route('/checkout')
+# @login_required  # Temporariamente desabilitado para teste
+def checkout():
+    return render_template('checkout.html')
+
+@dashboard_bp.route('/order-confirmation')
+# @login_required  # Temporariamente desabilitado para teste
+def order_confirmation():
+    return render_template('order_confirmation.html')
 
 @dashboard_bp.route('/loja')
 @login_required
