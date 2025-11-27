@@ -7,9 +7,41 @@
     <title>Loja - BigodeTexas</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
+        .category-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .category-tab {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .category-tab:hover {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        .category-tab.active {
+            background: var(--accent-primary);
+            color: #000;
+            border-color: var(--accent-primary);
+        }
+
         .shop-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
             margin-top: 2rem;
         }
@@ -27,10 +59,21 @@
             border-color: var(--accent-primary);
         }
 
+        .item-category {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(245, 158, 11, 0.2);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+
         .item-name {
             font-size: 1.25rem;
             font-weight: 700;
-            color: var(--accent-primary);
+            color: #fff;
             margin-bottom: 0.5rem;
         }
 
@@ -44,6 +87,7 @@
         .item-description {
             color: var(--text-secondary);
             margin-bottom: 1rem;
+            font-size: 0.9rem;
         }
 
         .buy-btn {
@@ -69,6 +113,13 @@
             color: var(--text-secondary);
             padding: 3rem;
         }
+
+        .item-count {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 
@@ -90,13 +141,55 @@
         <h1 class="fade-in">🛒 Loja BigodeTexas</h1>
         <p class="text-secondary fade-in">Compre itens para usar no servidor</p>
 
+        <div class="category-tabs">
+            <button class="category-tab active" onclick="filterCategory('todos')" data-category="todos">
+                🌟 Todos
+            </button>
+            <button class="category-tab" onclick="filterCategory('armas')" data-category="armas">
+                🔫 Armas
+            </button>
+            <button class="category-tab" onclick="filterCategory('municao')" data-category="municao">
+                💥 Munição
+            </button>
+            <button class="category-tab" onclick="filterCategory('medico')" data-category="medico">
+                🏥 Médico
+            </button>
+            <button class="category-tab" onclick="filterCategory('roupas')" data-category="roupas">
+                👕 Roupas Comuns
+            </button>
+            <button class="category-tab" onclick="filterCategory('militares')" data-category="militares">
+                🎖️ Roupas Militares
+            </button>
+            <button class="category-tab" onclick="filterCategory('construcao')" data-category="construcao">
+                🏗️ Construção
+            </button>
+            <button class="category-tab" onclick="filterCategory('veiculos')" data-category="veiculos">
+                🚗 Peças de Veículo
+            </button>
+        </div>
+
         <div id="shop-container" class="shop-grid">
             <div class="loading">Carregando itens...</div>
         </div>
+        <div id="item-count" class="item-count"></div>
     </div>
 
     <script>
         console.log('[SHOP] Página carregada');
+
+        let allItems = [];
+        let currentCategory = 'todos';
+
+        // Mapeamento de categorias
+        const categoryMap = {
+            'armas': ['armas'],
+            'municao': ['municao', 'munição', 'carregadores'],
+            'medico': ['medico', 'médico'],
+            'roupas': ['roupas'],
+            'militares': ['militares', 'militar'],
+            'construcao': ['construcao', 'construção'],
+            'veiculos': ['veiculos', 'veículos', 'veiculo']
+        };
 
         // Carregar itens da API
         async function loadShop() {
@@ -109,27 +202,11 @@
                     throw new Error('Erro ao carregar itens');
                 }
 
-                const items = await response.json();
-                console.log('[SHOP] Itens carregados:', items.length);
+                allItems = await response.json();
+                console.log('[SHOP] Itens carregados:', allItems.length);
 
-                const container = document.getElementById('shop-container');
-                container.innerHTML = '';
+                renderItems(allItems);
 
-                items.forEach(item => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'shop-item';
-                    itemDiv.innerHTML = `
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-description">${item.description}</div>
-                        <div class="item-price">${item.price} 💰</div>
-                        <button class="buy-btn" onclick="buyItem('${item.code}', '${item.name}', ${item.price})">
-                            Comprar
-                        </button>
-                    `;
-                    container.appendChild(itemDiv);
-                });
-
-                console.log('[SHOP] Itens renderizados com sucesso!');
             } catch (error) {
                 console.error('[SHOP] Erro:', error);
                 document.getElementById('shop-container').innerHTML = `
@@ -138,6 +215,82 @@
                     </div>
                 `;
             }
+        }
+
+        function renderItems(items) {
+            const container = document.getElementById('shop-container');
+            container.innerHTML = '';
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="loading">Nenhum item encontrado nesta categoria.</div>';
+                document.getElementById('item-count').textContent = '';
+                return;
+            }
+
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'shop-item';
+                itemDiv.innerHTML = `
+                    <div class="item-category">${getCategoryEmoji(item.category)} ${formatCategory(item.category)}</div>
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-description">${item.description}</div>
+                    <div class="item-price">${item.price} 💰</div>
+                    <button class="buy-btn" onclick="buyItem('${item.code}', '${item.name}', ${item.price})">
+                        Comprar
+                    </button>
+                `;
+                container.appendChild(itemDiv);
+            });
+
+            document.getElementById('item-count').textContent = `Mostrando ${items.length} ${items.length === 1 ? 'item' : 'itens'}`;
+            console.log('[SHOP] Itens renderizados:', items.length);
+        }
+
+        function filterCategory(category) {
+            currentCategory = category;
+
+            // Atualizar abas ativas
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-category="${category}"]`).classList.add('active');
+
+            // Filtrar itens
+            if (category === 'todos') {
+                renderItems(allItems);
+            } else {
+                const categories = categoryMap[category] || [category];
+                const filtered = allItems.filter(item =>
+                    categories.some(cat =>
+                        item.category.toLowerCase().includes(cat.toLowerCase())
+                    )
+                );
+                renderItems(filtered);
+            }
+        }
+
+        function getCategoryEmoji(category) {
+            const emojis = {
+                'armas': '🔫',
+                'municao': '💥',
+                'munição': '💥',
+                'carregadores': '📦',
+                'medico': '🏥',
+                'médico': '🏥',
+                'roupas': '👕',
+                'militares': '🎖️',
+                'militar': '🎖️',
+                'construcao': '🏗️',
+                'construção': '🏗️',
+                'veiculos': '🚗',
+                'veículos': '🚗',
+                'veiculo': '🚗'
+            };
+            return emojis[category.toLowerCase()] || '📦';
+        }
+
+        function formatCategory(category) {
+            return category.charAt(0).toUpperCase() + category.slice(1);
         }
 
         function buyItem(code, name, price) {
