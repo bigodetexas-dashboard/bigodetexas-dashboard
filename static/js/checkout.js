@@ -6,63 +6,78 @@ let userBalance = 0;
 let selectedCoords = null;
 let map = null;
 let marker = null;
-// Create map with Simple CRS (Coordinate Reference System)
-map = L.map('map', {
-    crs: L.CRS.Simple,
-    minZoom: -2,
-    maxZoom: 6, // Allow deep zoom for high-res feel
-    zoomSnap: 0.5,
-    zoomControl: true,
-    attributionControl: false
-});
+// Initialize Leaflet Map (GINFO Style)
+function initializeLeafletMap() {
+    // Create map with Simple CRS (Coordinate Reference System)
+    map = L.map('map', {
+        crs: L.CRS.Simple,
+        minZoom: -2,
+        maxZoom: 6, // Allow deep zoom for high-res feel
+        zoomSnap: 0.5,
+        zoomControl: true,
+        attributionControl: false
+    });
 
-// Define bounds for Chernarus (15360x15360)
-// Leaflet CRS.Simple: [y, x]
-const bounds = [[0, 0], [MAP_SIZE, MAP_SIZE]];
+    // Define bounds for Chernarus (15360x15360)
+    // Leaflet CRS.Simple: [y, x]
+    const bounds = [[0, 0], [MAP_SIZE, MAP_SIZE]];
 
-// === MAP DATA SOURCE ===
-// Currently using local image. 
-// TO UPGRADE: Replace 'chernarus_map.png' with a high-res 8192x8192 image
-// OR uncomment the tile layer code below if you have tiles.
+    // === MAP DATA SOURCE ===
+    // Currently using local image. 
+    const imageUrl = '/static/img/chernarus_map.png';
+    const imageOverlay = L.imageOverlay(imageUrl, bounds);
 
-const imageOverlay = L.imageOverlay('/static/img/chernarus_map.png', bounds);
-imageOverlay.addTo(map);
+    // DEBUG: Event listeners for image loading
+    imageOverlay.on('load', () => {
+        console.log("✅ MAP IMAGE LOADED SUCCESSFULLY");
+    });
 
-/* 
-// TILE LAYER OPTION (If you generate tiles later)
-L.tileLayer('/static/tiles/{z}/{x}/{y}.png', {
-    minZoom: 0,
-    maxZoom: 6,
-    bounds: bounds,
-    noWrap: true,
-    tileSize: 256
-}).addTo(map);
-*/
+    imageOverlay.on('error', (e) => {
+        console.error("❌ MAP IMAGE FAILED TO LOAD", e);
+        alert(`ERRO: A imagem do mapa não carregou.\nURL: ${imageUrl}\nVerifique sua conexão ou se existe algum bloqueador.`);
 
-// Fit map to bounds initially
-map.fitBounds(bounds);
+        // Fallback: Show a colored background so user knows map area exists
+        document.getElementById('map').style.backgroundColor = '#2a2a2a';
+        document.getElementById('map').innerHTML += '<p style="color:white; text-align:center; padding-top:50px;">Erro ao carregar imagem do mapa.</p>';
+    });
 
-// Add scale control (Meters)
-L.control.scale({
-    imperial: false,
-    metric: true,
-    maxWidth: 200
-}).addTo(map);
+    imageOverlay.addTo(map);
 
-// Click event handler
-map.on('click', function (e) {
-    // In CRS.Simple with bounds [[0,0], [H,W]]:
-    // e.latlng.lng = X coordinate
-    // e.latlng.lat = Y coordinate (from bottom 0 to top H)
+    // Fit map to bounds initially
+    map.fitBounds(bounds);
 
-    const x = Math.round(e.latlng.lng);
-    const z = Math.round(e.latlng.lat);
+    // Add scale control (Meters)
+    L.control.scale({
+        imperial: false,
+        metric: true,
+        maxWidth: 200
+    }).addTo(map);
 
-    // Validate coordinates
-    if (x >= 0 && x <= MAP_SIZE && z >= 0 && z <= MAP_SIZE) {
-        setCoordinates(x, z, e.latlng);
-    }
-});
+    // DEBUG: Check container size
+    setTimeout(() => {
+        const mapDiv = document.getElementById('map');
+        console.log(`Map Size: ${mapDiv.offsetWidth}x${mapDiv.offsetHeight}`);
+        if (mapDiv.offsetHeight < 100) {
+            alert(`ALERTA: O mapa está muito pequeno (${mapDiv.offsetHeight}px). Isso pode ser um erro de CSS.`);
+            mapDiv.style.height = '700px'; // Force fix
+            map.invalidateSize();
+        }
+    }, 1000);
+
+    // Click event handler
+    map.on('click', function (e) {
+        // In CRS.Simple with bounds [[0,0], [H,W]]:
+        // e.latlng.lng = X coordinate
+        // e.latlng.lat = Y coordinate (from bottom 0 to top H)
+
+        const x = Math.round(e.latlng.lng);
+        const z = Math.round(e.latlng.lat);
+
+        // Validate coordinates
+        if (x >= 0 && x <= MAP_SIZE && z >= 0 && z <= MAP_SIZE) {
+            setCoordinates(x, z, e.latlng);
+        }
+    });
 }
 
 // Setup Event Listeners
