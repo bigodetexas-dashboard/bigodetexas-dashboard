@@ -6,7 +6,271 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loja - BigodeTexas</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-right: 350px;
+        }
+
+        .cart-sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 350px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            border-left: 2px solid var(--accent-primary);
+            padding: 2rem;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .cart-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent-primary);
+        }
+
+        .cart-badge {
+            background: var(--accent-primary);
+            color: #000;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-weight: 700;
+        }
+
+        .cart-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .cart-item-name {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .qty-btn {
+            background: var(--accent-primary);
+            color: #000;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .qty-display {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .remove-btn {
+            background: #ef4444;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .cart-summary {
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .cart-total {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #22c55e;
+            margin: 1rem 0;
+        }
+
+        .user-balance {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent-primary);
+            color: #000;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .checkout-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 900px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .map-container {
+            margin: 2rem 0;
+        }
+
+        .map-image-container {
+            position: relative;
+            width: 100%;
+            border: 2px solid var(--accent-primary);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        #chernarus-map {
+            width: 100%;
+            height: auto;
+            cursor: crosshair;
+        }
+
+        .map-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #ef4444;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+
+        .coordinates-display {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 1rem;
+            background: #6b7280;
+            color: #fff;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-confirm {
+            flex: 2;
+            padding: 1rem;
+            background: var(--accent-primary);
+            color: #000;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            z-index: 3000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-success {
+            background: #22c55e;
+            color: #000;
+        }
+
+        .notification-error {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .notification-info {
+            background: #3b82f6;
+            color: #fff;
+        }
+
         .category-tabs {
             display: flex;
             gap: 0.5rem;
@@ -124,63 +388,100 @@
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="navbar-container">
-            <a href="/" class="navbar-brand">🤠 BigodeTexas</a>
-            <ul class="navbar-nav">
-                <li><a href="/" class="nav-link">Início</a></li>
-                <li><a href="/stats" class="nav-link">Estatísticas</a></li>
-                <li><a href="/leaderboard" class="nav-link">Ranking</a></li>
-                <li><a href="/shop" class="nav-link">Loja</a></li>
-                <li><a href="/heatmap" class="nav-link">Mapa de Calor</a></li>
-            </ul>
-        </div>
-    </nav>
+    <div class="main-content">
+        <nav class="navbar">
+            <div class="navbar-container">
+                <a href="/" class="navbar-brand">🤠 BigodeTexas</a>
+                <ul class="navbar-nav">
+                    <li><a href="/" class="nav-link">Início</a></li>
+                    <li><a href="/stats" class="nav-link">Estatísticas</a></li>
+                    <li><a href="/leaderboard" class="nav-link">Ranking</a></li>
+                    <li><a href="/shop" class="nav-link">Loja</a></li>
+                    <li><a href="/heatmap" class="nav-link">Mapa de Calor</a></li>
+                </ul>
+            </div>
+        </nav>
 
-    <div class="container">
-        <h1 class="fade-in">🛒 Loja BigodeTexas</h1>
-        <p class="text-secondary fade-in">Compre itens para usar no servidor</p>
+        <div class="container">
+            <h1 class="fade-in">🛒 Loja BigodeTexas</h1>
+            <p class="text-secondary fade-in">Adicione itens ao carrinho e finalize sua compra</p>
 
-        <div class="category-tabs">
-            <button class="category-tab active" onclick="filterCategory('todos')" data-category="todos">
-                🌟 Todos
-            </button>
-            <button class="category-tab" onclick="filterCategory('armas')" data-category="armas">
-                🔫 Armas
-            </button>
-            <button class="category-tab" onclick="filterCategory('municao')" data-category="municao">
-                💥 Munição
-            </button>
-            <button class="category-tab" onclick="filterCategory('medico')" data-category="medico">
-                🏥 Médico
-            </button>
-            <button class="category-tab" onclick="filterCategory('roupas')" data-category="roupas">
-                👕 Roupas Comuns
-            </button>
-            <button class="category-tab" onclick="filterCategory('militares')" data-category="militares">
-                🎖️ Roupas Militares
-            </button>
-            <button class="category-tab" onclick="filterCategory('construcao')" data-category="construcao">
-                🏗️ Construção
-            </button>
-            <button class="category-tab" onclick="filterCategory('veiculos')" data-category="veiculos">
-                🚗 Peças de Veículo
-            </button>
-        </div>
+            <div class="category-tabs">
+                <button class="category-tab active" onclick="filterCategory('todos')" data-category="todos">🌟
+                    Todos</button>
+                <button class="category-tab" onclick="filterCategory('armas')" data-category="armas">🔫 Armas</button>
+                <button class="category-tab" onclick="filterCategory('municao')" data-category="municao">💥
+                    Munição</button>
+                <button class="category-tab" onclick="filterCategory('medico')" data-category="medico">🏥
+                    Médico</button>
+                <button class="category-tab" onclick="filterCategory('roupas')" data-category="roupas">👕 Roupas
+                    Comuns</button>
+                <button class="category-tab" onclick="filterCategory('militares')" data-category="militares">🎖️ Roupas
+                    Militares</button>
+                <button class="category-tab" onclick="filterCategory('construcao')" data-category="construcao">🏗️
+                    Construção</button>
+                <button class="category-tab" onclick="filterCategory('veiculos')" data-category="veiculos">🚗 Peças de
+                    Veículo</button>
+            </div>
 
-        <div id="shop-container" class="shop-grid">
-            <div class="loading">Carregando itens...</div>
+            <div id="shop-container" class="shop-grid">
+                <div class="loading">Carregando itens...</div>
+            </div>
+            <div id="item-count" class="item-count"></div>
         </div>
-        <div id="item-count" class="item-count"></div>
     </div>
 
+    <!-- Carrinho Lateral -->
+    <div class="cart-sidebar">
+        <div class="cart-header">
+            <div class="cart-title">🛒 Carrinho</div>
+            <div class="cart-badge" id="cart-badge">0</div>
+        </div>
+
+        <div id="cart-items">
+            <p class="text-muted">Carrinho vazio</p>
+        </div>
+
+        <div class="cart-summary">
+            <div class="user-balance" id="user-balance">Saldo: 0 💰</div>
+            <div class="cart-total" id="cart-total">Total: 0 💰</div>
+            <button class="checkout-btn" onclick="openCheckout()" id="checkout-btn">
+                Finalizar Compra
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Checkout -->
+    <div class="checkout-modal" id="checkout-modal">
+        <div class="modal-content">
+            <h2>📍 Selecione o Local de Entrega</h2>
+            <p>Clique no mapa para escolher onde seus itens serão entregues</p>
+
+            <div class="map-container" id="map-container">
+                <div class="map-image-container">
+                    <img src="https://dayz.fandom.com/wiki/File:Chernarus_Plus_Topographic_Map.jpg"
+                        alt="Mapa de Chernarus" id="chernarus-map">
+                    <div id="map-marker" class="map-marker"></div>
+                </div>
+                <div class="coordinates-display">
+                    <span id="selected-coords">Nenhuma coordenada selecionada</span>
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeCheckout()">Cancelar</button>
+                <button class="btn-confirm" onclick="finalizePurchase()">Confirmar Compra</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/shop_cart.js"></script>
     <script>
         console.log('[SHOP] Página carregada');
 
         let allItems = [];
         let currentCategory = 'todos';
 
-        // Mapeamento de categorias
         const categoryMap = {
             'armas': ['armas'],
             'municao': ['municao', 'munição', 'carregadores'],
@@ -191,7 +492,6 @@
             'veiculos': ['veiculos', 'veículos', 'veiculo']
         };
 
-        // Carregar itens da API
         async function loadShop() {
             console.log('[SHOP] Carregando itens da API...');
             try {
@@ -235,8 +535,8 @@
                     <div class="item-name">${item.name}</div>
                     <div class="item-description">${item.description}</div>
                     <div class="item-price">${item.price} 💰</div>
-                    <button class="buy-btn" onclick="buyItem('${item.code}', '${item.name}', ${item.price})">
-                        Comprar
+                    <button class="buy-btn" onclick="addToCart('${item.code}', '${item.name}', ${item.price}, '${item.category}')">
+                        Adicionar ao Carrinho
                     </button>
                 `;
                 container.appendChild(itemDiv);
@@ -249,13 +549,11 @@
         function filterCategory(category) {
             currentCategory = category;
 
-            // Atualizar abas ativas
             document.querySelectorAll('.category-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.querySelector(`[data-category="${category}"]`).classList.add('active');
 
-            // Filtrar itens
             if (category === 'todos') {
                 renderItems(allItems);
             } else {
@@ -293,11 +591,6 @@
             return category.charAt(0).toUpperCase() + category.slice(1);
         }
 
-        function buyItem(code, name, price) {
-            alert(`Você deseja comprar: ${name} por ${price} 💰\n\nUse o comando no Discord:\n!comprar ${code}`);
-        }
-
-        // Carregar quando a página estiver pronta
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', loadShop);
         } else {

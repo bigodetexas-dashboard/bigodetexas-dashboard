@@ -141,6 +141,11 @@ import threading
 # Rodar o servidor web em uma thread separada
 threading.Thread(target=lambda: health_app.run(host="0.0.0.0", port=int(os.getenv("PORT", 3000))), daemon=True).start()
 
+# Iniciar processador de entregas em background
+from delivery_processor import process_pending_deliveries
+threading.Thread(target=lambda: asyncio.run(process_pending_deliveries()), daemon=True).start()
+print("[DELIVERY] Processador de entregas iniciado!")
+
 # --- CLASSE DE PAGINAÇÃO INTERATIVA ---
 class ShopPaginator(discord.ui.View):
     def __init__(self, items_list, category_name, category_emoji, items_per_page=5):

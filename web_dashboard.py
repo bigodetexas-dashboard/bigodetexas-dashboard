@@ -101,6 +101,84 @@ def api_shop():
             })
     return jsonify(shop_items)
 
+@dashboard_bp.route('/api/user/balance')
+@login_required
+def api_user_balance():
+    from flask import session
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    economy = database.get_all_economy()
+    user_data = economy.get(str(user_id), {})
+    balance = user_data.get('balance', 0)
+    
+    return jsonify({
+        'balance': balance,
+        'user_id': user_id
+    })
+
+@dashboard_bp.route('/api/shop/purchase', methods=['POST'])
+@login_required
+def api_shop_purchase():
+    from flask import session, request
+    import asyncio
+    from datetime import datetime, timedelta
+    
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    items = data.get('items', [])
+    coordinates = data.get('coordinates', {})
+    total = data.get('total', 0)
+    
+    if not items or not coordinates:
+        return jsonify({'error': 'Dados inválidos'}), 400
+    
+    # Verificar saldo
+    economy = database.get_all_economy()
+    user_data = economy.get(str(user_id), {})
+    balance = user_data.get('balance', 0)
+    
+    if total > balance:
+        return jsonify({'error': 'Saldo insuficiente'}), 400
+    
+    # Deduzir saldo
+    new_balance = balance - total
+    database.update_economy(str(user_id), {'balance': new_balance})
+    
+    # Criar pedido de entrega (será processado em 5 minutos)
+    delivery_time = datetime.now() + timedelta(minutes=5)
+    
+    # Salvar pedido pendente
+    pending_deliveries = load_json('pending_deliveries.json')
+    delivery_id = f"delivery_{user_id}_{int(datetime.now().timestamp())}"
+    
+    pending_deliveries[delivery_id] = {
+        'user_id': str(user_id),
+        'items': items,
+        'coordinates': coordinates,
+        'total': total,
+        'status': 'pending',
+        'created_at': datetime.now().isoformat(),
+        'delivery_at': delivery_time.isoformat()
+    }
+    
+    # Salvar arquivo
+    with open('pending_deliveries.json', 'w', encoding='utf-8') as f:
+        json.dump(pending_deliveries, f, indent=2, ensure_ascii=False)
+    
+    return jsonify({
+        'success': True,
+        'coordinates': coordinates,
+        'total': total,
+        'newBalance': new_balance,
+        'deliveryTime': '5 minutos',
+        'deliveryId': delivery_id
+    })
+
 @dashboard_bp.route('/api/wars')
 def api_wars():
     clans = database.get_all_clans()
