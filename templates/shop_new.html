@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja - BigodeTexas</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .shop-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .shop-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-primary);
+        }
+
+        .item-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .item-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #22c55e;
+            margin: 1rem 0;
+        }
+
+        .item-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--accent-primary);
+            color: #000;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .buy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            padding: 3rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">🤠 BigodeTexas</a>
+            <ul class="navbar-nav">
+                <li><a href="/" class="nav-link">Início</a></li>
+                <li><a href="/stats" class="nav-link">Estatísticas</a></li>
+                <li><a href="/leaderboard" class="nav-link">Ranking</a></li>
+                <li><a href="/shop" class="nav-link">Loja</a></li>
+                <li><a href="/heatmap" class="nav-link">Mapa de Calor</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="fade-in">🛒 Loja BigodeTexas</h1>
+        <p class="text-secondary fade-in">Compre itens para usar no servidor</p>
+
+        <div id="shop-container" class="shop-grid">
+            <div class="loading">Carregando itens...</div>
+        </div>
+    </div>
+
+    <script>
+        console.log('[SHOP] Página carregada');
+
+        // Carregar itens da API
+        async function loadShop() {
+            console.log('[SHOP] Carregando itens da API...');
+            try {
+                const response = await fetch('/api/shop');
+                console.log('[SHOP] Response status:', response.status);
+
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar itens');
+                }
+
+                const items = await response.json();
+                console.log('[SHOP] Itens carregados:', items.length);
+
+                const container = document.getElementById('shop-container');
+                container.innerHTML = '';
+
+                items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'shop-item';
+                    itemDiv.innerHTML = `
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-description">${item.description}</div>
+                        <div class="item-price">${item.price} 💰</div>
+                        <button class="buy-btn" onclick="buyItem('${item.code}', '${item.name}', ${item.price})">
+                            Comprar
+                        </button>
+                    `;
+                    container.appendChild(itemDiv);
+                });
+
+                console.log('[SHOP] Itens renderizados com sucesso!');
+            } catch (error) {
+                console.error('[SHOP] Erro:', error);
+                document.getElementById('shop-container').innerHTML = `
+                    <div class="loading" style="color: #ef4444;">
+                        Erro ao carregar itens. Tente novamente mais tarde.
+                    </div>
+                `;
+            }
+        }
+
+        function buyItem(code, name, price) {
+            alert(`Você deseja comprar: ${name} por ${price} 💰\n\nUse o comando no Discord:\n!comprar ${code}`);
+        }
+
+        // Carregar quando a página estiver pronta
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadShop);
+        } else {
+            loadShop();
+        }
+    </script>
+</body>
+
+</html>

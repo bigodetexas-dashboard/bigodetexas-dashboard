@@ -181,7 +181,7 @@ def stats():
 @dashboard_bp.route('/shop')
 @login_required
 def shop():
-    return render_template('marketplace.html')
+    return render_template('shop_new.html')
 
 @dashboard_bp.route('/loja')
 @login_required
