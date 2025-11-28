@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Debug Auth - BigodeTexas</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .section {
+            background: #16213e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+
+        .ok {
+            color: #00ff00;
+        }
+
+        .error {
+            color: #ff4444;
+        }
+
+        pre {
+            background: #0f3460;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Debug de Autenticação</h1>
+
+    <div class="section">
+        <h2>Variáveis de Ambiente OAuth</h2>
+        <p>DISCORD_CLIENT_ID: <span class="{{ 'ok' if client_id else 'error' }}">{{ 'Configurado ✓' if client_id else
+                'NÃO CONFIGURADO ✗' }}</span></p>
+        <p>DISCORD_CLIENT_SECRET: <span class="{{ 'ok' if client_secret else 'error' }}">{{ 'Configurado ✓' if
+                client_secret else 'NÃO CONFIGURADO ✗' }}</span></p>
+        <p>DISCORD_REDIRECT_URI: <span class="ok">{{ redirect_uri }}</span></p>
+        <p>DEV_MODE: <span class="{{ 'error' if dev_mode else 'ok' }}">{{ 'ATIVO ✗' if dev_mode else 'DESATIVADO ✓'
+                }}</span></p>
+    </div>
+
+    <div class="section">
+        <h2>Sessão Atual</h2>
+        <p>Usuário Logado: <span class="{{ 'ok' if user else 'error' }}">{{ 'SIM ✓' if user else 'NÃO ✗' }}</span></p>
+        {% if user %}
+        <pre>{{ user | tojson(indent=2) }}</pre>
+        {% endif %}
+        <p>Discord User ID: <span class="{{ 'ok' if discord_user_id else 'error' }}">{{ discord_user_id or 'Nenhum'
+                }}</span></p>
+        <p>Discord Username: <span class="{{ 'ok' if discord_username else 'error' }}">{{ discord_username or 'Nenhum'
+                }}</span></p>
+    </div>
+
+    <div class="section">
+        <h2>Configuração Flask</h2>
+        <p>SECRET_KEY: <span class="{{ 'ok' if secret_key else 'error' }}">{{ 'Configurado ✓' if secret_key else 'NÃO
+                CONFIGURADO ✗' }}</span></p>
+        <p>SESSION_TYPE: <span class="ok">{{ session_type }}</span></p>
+    </div>
+
+    <div class="section">
+        <h2>Ações</h2>
+        <p><a href="/login" style="color: #5865F2;">🔵 Fazer Login com Discord</a></p>
+        <p><a href="/logout" style="color: #ff4444;">🔴 Fazer Logout</a></p>
+        <p><a href="/shop" style="color: #00ff00;">🛒 Ir para Shop</a></p>
+    </div>
+</body>
+
+</html>

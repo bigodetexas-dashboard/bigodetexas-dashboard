@@ -237,23 +237,6 @@ def index():
     return render_template('index.html')
 
 @dashboard_bp.route('/stats')
-@login_required
-def stats():
-    return render_template('stats.html')
-
-@dashboard_bp.route('/shop')
-# @login_required  # Temporariamente desabilitado para teste
-def shop():
-    return render_template('shop_ecommerce.html')
-
-@dashboard_bp.route('/shop-old')
-@login_required
-def shop_old():
-    return render_template('shop_new.html')
-
-@dashboard_bp.route('/checkout')
-# @login_required  # Temporariamente desabilitado para teste
-def checkout():
     return render_template('checkout.html')
 
 @dashboard_bp.route('/order-confirmation')
