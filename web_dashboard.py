@@ -112,7 +112,7 @@ def api_user_balance():
     
     economy = database.get_all_economy()
     user_data = economy.get(str(user_id), {})
-        balance = user_data.get('balance', 0)
+    balance = user_data.get('balance', 0)
     
     return jsonify({
         'balance': balance,
