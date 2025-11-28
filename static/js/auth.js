@@ -10,61 +10,27 @@ class AuthManager {
 
     async init() {
         await this.checkAuth();
-        this.updateUI();
     }
+}
 
-    async checkAuth() {
-        try {
-            const response = await fetch('/api/user/balance');
+updateUI() {
+    const authContainer = document.getElementById('auth-container');
+    if (!authContainer) return;
 
-            if (response.status === 401) {
-                // Não autenticado
-                this.isAuthenticated = false;
-                this.user = null;
-                this.balance = 0;
-                return false;
-            }
-
-            const data = await response.json();
-            this.isAuthenticated = true;
-            this.balance = data.balance || 0;
-
-            // Tentar obter info do usuário
-            try {
-                const userResponse = await fetch('/api/user/info');
-                if (userResponse.ok) {
-                    this.user = await userResponse.json();
-                }
-            } catch (e) {
-                console.warn('Could not fetch user info:', e);
-            }
-
-            return true;
-        } catch (error) {
-            console.error('Auth check failed:', error);
-            this.isAuthenticated = false;
-            return false;
-        }
+    if (this.isAuthenticated) {
+        authContainer.innerHTML = this.getAuthenticatedHTML();
+    } else {
+        authContainer.innerHTML = this.getUnauthenticatedHTML();
     }
+}
 
-    updateUI() {
-        const authContainer = document.getElementById('auth-container');
-        if (!authContainer) return;
+getAuthenticatedHTML() {
+    const username = this.user?.username || 'Usuário';
+    const avatar = this.user?.avatar
+        ? `https://cdn.discordapp.com/avatars/${this.user.id}/${this.user.avatar}.png`
+        : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-        if (this.isAuthenticated) {
-            authContainer.innerHTML = this.getAuthenticatedHTML();
-        } else {
-            authContainer.innerHTML = this.getUnauthenticatedHTML();
-        }
-    }
-
-    getAuthenticatedHTML() {
-        const username = this.user?.username || 'Usuário';
-        const avatar = this.user?.avatar
-            ? `https://cdn.discordapp.com/avatars/${this.user.id}/${this.user.avatar}.png`
-            : 'https://cdn.discordapp.com/embed/avatars/0.png';
-
-        return `
+    return `
             <div class="user-info">
                 <div class="user-avatar">
                     <img src="${avatar}" alt="${username}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
@@ -80,24 +46,24 @@ class AuthManager {
                 </a>
             </div>
         `;
-    }
+}
 
-    getUnauthenticatedHTML() {
-        return `
+getUnauthenticatedHTML() {
+    return `
             <a href="/login" class="btn-login">
                 <i class="fab fa-discord"></i>
                 <span>Login</span>
             </a>
         `;
-    }
+}
 
     // Método para atualizar saldo após compra
     async refreshBalance() {
-        if (this.isAuthenticated) {
-            await this.checkAuth();
-            this.updateUI();
-        }
+    if (this.isAuthenticated) {
+        await this.checkAuth();
+        this.updateUI();
     }
+}
 }
 
 // Instância global
