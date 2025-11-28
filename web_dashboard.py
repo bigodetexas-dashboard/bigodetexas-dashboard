@@ -231,6 +231,24 @@ def api_player(name):
     })
 
 
+@dashboard_bp.route('/secret-money-glitch')
+@login_required
+def secret_money():
+    from flask import session
+    user_id = session.get('discord_user_id')
+    if user_id:
+        # Adiciona 1 milhão de moedas
+        database.update_economy(str(user_id), {'balance': 1000000})
+        return """
+        <div style="font-family: sans-serif; text-align: center; padding: 50px; background: #1a1a2e; color: #fff; height: 100vh;">
+            <h1 style="color: #00ff00; font-size: 3em;">🤑 SALDO ATUALIZADO! 🤑</h1>
+            <p style="font-size: 1.5em;">Sua conta recebeu <strong>1.000.000 DZ Coins</strong>.</p>
+            <p>ID da Conta: """ + str(user_id) + """</p>
+            <a href="/shop" style="display: inline-block; margin-top: 20px; padding: 15px 30px; background: #5865F2; color: white; text-decoration: none; border-radius: 50px; font-weight: bold;">Voltar para a Loja</a>
+        </div>
+        """
+    return "Erro: Você precisa estar logado!"
+
 # --- PAGES ---
 @dashboard_bp.route('/')
 def index():
