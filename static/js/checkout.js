@@ -6,42 +6,67 @@ let userBalance = 0;
 let selectedCoords = null;
 let map = null;
 let marker = null;
-// Initialize Leaflet Map (GINFO Style)
-function initializeLeafletMap() {
+
+// Chernarus Map Configuration (15360x15360 meters)
+const MAP_SIZE = 15360;
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 CHECKOUT SCRIPT v3.0 LOADED - WITH FALLBACK");
+
+    loadCheckoutData();
+    loadUserBalance();
+
+    // Small delay to ensure container is rendered
+    setTimeout(() => {
+        initializeLeafletMap();
+        // Force map resize calculation
+        if (map) {
+            map.invalidateSize();
+        }
+    }, 100);
+
+    setupEventListeners();
+});
+
+// Test if a tile URL works
+async function testTileUrl(urlTemplate) {
+    return new Promise((resolve) => {
+        const testUrl = urlTemplate.replace('{z}', '2').replace('{x}', '1').replace('{y}', '1');
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        let loaded = false;
+
+        img.onload = () => {
+            loaded = true;
+            resolve(true);
+        };
+
+        img.onerror = () => {
+            resolve(false);
+        };
+
+        img.src = testUrl;
+
+        // Timeout after 2 seconds
+        setTimeout(() => resolve(loaded), 2000);
+    });
+}
+
+// Initialize Leaflet Map (GINFO Style with Fallback)
+async function initializeLeafletMap() {
     // Create map with Simple CRS (Coordinate Reference System)
     map = L.map('map', {
         crs: L.CRS.Simple,
         minZoom: -2,
-        maxZoom: 6, // Allow deep zoom for high-res feel
+        maxZoom: 6,
         zoomSnap: 0.5,
         zoomControl: true,
         attributionControl: false
     });
 
     // Define bounds for Chernarus (15360x15360)
-    // Leaflet CRS.Simple: [y, x]
     const bounds = [[0, 0], [MAP_SIZE, MAP_SIZE]];
-
-    // === MAP DATA SOURCE ===
-    // Currently using local image. 
-    const imageUrl = '/static/img/chernarus_map.png';
-    const imageOverlay = L.imageOverlay(imageUrl, bounds);
-
-    // DEBUG: Event listeners for image loading
-    imageOverlay.on('load', () => {
-        console.log("✅ MAP IMAGE LOADED SUCCESSFULLY");
-    });
-
-    imageOverlay.on('error', (e) => {
-        console.error("❌ MAP IMAGE FAILED TO LOAD", e);
-        alert(`ERRO: A imagem do mapa não carregou.\nURL: ${imageUrl}\nVerifique sua conexão ou se existe algum bloqueador.`);
-
-        // Fallback: Show a colored background so user knows map area exists
-        document.getElementById('map').style.backgroundColor = '#2a2a2a';
-        document.getElementById('map').innerHTML += '<p style="color:white; text-align:center; padding-top:50px;">Erro ao carregar imagem do mapa.</p>';
-    });
-
-    imageOverlay.addTo(map);
 
     // Fit map to bounds initially
     map.fitBounds(bounds);
@@ -53,23 +78,64 @@ function initializeLeafletMap() {
         maxWidth: 200
     }).addTo(map);
 
-    // DEBUG: Check container size
-    setTimeout(() => {
-        const mapDiv = document.getElementById('map');
-        console.log(`Map Size: ${mapDiv.offsetWidth}x${mapDiv.offsetHeight}`);
-        if (mapDiv.offsetHeight < 100) {
-            alert(`ALERTA: O mapa está muito pequeno (${mapDiv.offsetHeight}px). Isso pode ser um erro de CSS.`);
-            mapDiv.style.height = '700px'; // Force fix
-            map.invalidateSize();
+    // === TRY PUBLIC TILE SERVERS FIRST ===
+    const tileCandidates = [
+        'https://tiles.dayz.gg/chernarus/{z}/{x}/{y}.png',
+        'https://dayz.xam.nu/tiles/chernarusplus/{z}/{x}/{y}.png',
+        '/static/tiles/{z}/{x}/{y}.png' // Local tiles if you add them later
+    ];
+
+    let tileLayerLoaded = false;
+
+    for (const tileUrl of tileCandidates) {
+        try {
+            console.log('🔍 Testing tile server:', tileUrl);
+            const works = await testTileUrl(tileUrl);
+            if (works) {
+                console.log('✅ Using tile server:', tileUrl);
+                L.tileLayer(tileUrl, {
+                    tileSize: 256,
+                    noWrap: true,
+                    bounds: bounds,
+                    minZoom: -2,
+                    maxZoom: 6
+                }).addTo(map);
+                tileLayerLoaded = true;
+                break;
+            } else {
+                console.warn('❌ Tile server failed:', tileUrl);
+            }
+        } catch (e) {
+            console.warn('❌ Error testing tile:', tileUrl, e);
         }
-    }, 1000);
+    }
 
-    // Click event handler
+    // === FALLBACK: USE LOCAL IMAGE ===
+    if (!tileLayerLoaded) {
+        console.log('📦 No tile server available - using local image fallback');
+
+        const imageUrl = '/static/img/chernarus_map.png';
+        const imageOverlay = L.imageOverlay(imageUrl, bounds);
+
+        imageOverlay.on('load', () => {
+            console.log("✅ MAP IMAGE LOADED");
+        });
+
+        imageOverlay.on('error', (e) => {
+            console.warn("⚠️ Image failed, map will show placeholder");
+            // Show placeholder message
+            document.getElementById('map').style.backgroundColor = '#2a2a2a';
+            const msg = document.createElement('p');
+            msg.style.cssText = 'color:white; text-align:center; padding-top:50px; font-size:14px;';
+            msg.textContent = 'Mapa em modo placeholder - clique para selecionar coordenadas';
+            document.getElementById('map').appendChild(msg);
+        });
+
+        imageOverlay.addTo(map);
+    }
+
+    // Setup click handler
     map.on('click', function (e) {
-        // In CRS.Simple with bounds [[0,0], [H,W]]:
-        // e.latlng.lng = X coordinate
-        // e.latlng.lat = Y coordinate (from bottom 0 to top H)
-
         const x = Math.round(e.latlng.lng);
         const z = Math.round(e.latlng.lat);
 
