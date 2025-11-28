@@ -1,147 +1,132 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<div class="header-content">
+    <div class="logo">
+        <i class="fas fa-skull-crossbones"></i>
+        <h1>BigodeTexas Shop</h1>
+    </div>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loja BigodeTexas - DayZ Shop</title>
-    <link rel="stylesheet" href="/static/css/shop.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
+    <!-- Auth Container (populated by auth.js) -->
+    <div id="auth-container"></div>
 
-<body>
-    <!-- Header -->
-    <header class="shop-header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-skull-crossbones"></i>
-                    <h1>BigodeTexas Shop</h1>
-                </div>
-
-                <!-- Auth Container (populated by auth.js) -->
-                <div id="auth-container"></div>
-
-                <div class="user-info">
-                    <div class="balance">
-                        <i class="fas fa-coins"></i>
-                        <span id="user-balance">0</span> DZ Coins
-                    </div>
-                    <button class="cart-btn" id="cart-toggle">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count" id="cart-count">0</span>
-                    </button>
-                </div>
-            </div>
+    <div class="user-info">
+        <div class="balance">
+            <i class="fas fa-coins"></i>
+            <span id="user-balance">0</span> DZ Coins
         </div>
-    </header>
+        <button class="cart-btn" id="cart-toggle">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count" id="cart-count">0</span>
+        </button>
+    </div>
+</div>
+</div>
+</header>
 
-    <!-- Categories Tabs -->
-    <nav class="categories-nav">
-        <div class="container">
-            <div class="categories-tabs">
-                <button class="category-tab active" data-category="armas">
-                    <i class="fas fa-gun"></i>
-                    <span>Armas</span>
-                </button>
-                <button class="category-tab" data-category="municao">
-                    <i class="fas fa-bullseye"></i>
-                    <span>Munições</span>
-                </button>
-                <button class="category-tab" data-category="medico">
-                    <i class="fas fa-medkit"></i>
-                    <span>Médico</span>
-                </button>
-                <button class="category-tab" data-category="acessorios">
-                    <i class="fas fa-tools"></i>
-                    <span>Acessórios</span>
-                </button>
-                <button class="category-tab" data-category="armadilhas">
-                    <i class="fas fa-bomb"></i>
-                    <span>Armadilhas</span>
-                </button>
-                <button class="category-tab" data-category="construcao">
-                    <i class="fas fa-hammer"></i>
-                    <span>Construção</span>
-                </button>
-                <button class="category-tab" data-category="veiculos">
-                    <i class="fas fa-car"></i>
-                    <span>Veículos</span>
-                </button>
-                <button class="category-tab" data-category="roupas">
-                    <i class="fas fa-tshirt"></i>
-                    <span>Roupas</span>
-                </button>
-                <button class="category-tab" data-category="mochilas">
-                    <i class="fas fa-backpack"></i>
-                    <span>Mochilas</span>
-                </button>
-                <button class="category-tab" data-category="comidas">
-                    <i class="fas fa-utensils"></i>
-                    <span>Comidas</span>
-                </button>
-                <button class="category-tab" data-category="cacador">
-                    <i class="fas fa-crosshairs"></i>
-                    <span>Caçador</span>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="shop-main">
-        <div class="container">
-            <div class="category-header">
-                <h2 id="category-title">Armas</h2>
-                <p id="category-description">Rifles, pistolas e armas de combate</p>
-            </div>
-
-            <!-- Products Grid -->
-            <div class="products-grid" id="products-grid">
-                <!-- Products will be loaded here by JavaScript -->
-            </div>
-        </div>
-    </main>
-
-    <!-- Cart Drawer -->
-    <div class="cart-drawer" id="cart-drawer">
-        <div class="cart-header">
-            <h3><i class="fas fa-shopping-cart"></i> Carrinho de Compras</h3>
-            <button class="close-cart" id="close-cart">
-                <i class="fas fa-times"></i>
+<!-- Categories Tabs -->
+<nav class="categories-nav">
+    <div class="container">
+        <div class="categories-tabs">
+            <button class="category-tab active" data-category="armas">
+                <i class="fas fa-gun"></i>
+                <span>Armas</span>
             </button>
-        </div>
-
-        <div class="cart-items" id="cart-items">
-            <!-- Cart items will be loaded here -->
-        </div>
-
-        <div class="cart-footer">
-            <div class="cart-total">
-                <span>Total:</span>
-                <span class="total-amount" id="cart-total">0 DZ Coins</span>
-            </div>
-            <button class="btn-checkout" id="btn-checkout">
-                <i class="fas fa-credit-card"></i>
-                Finalizar Compra
+            <button class="category-tab" data-category="municao">
+                <i class="fas fa-bullseye"></i>
+                <span>Munições</span>
             </button>
-            <button class="btn-clear-cart" id="btn-clear-cart">
-                <i class="fas fa-trash"></i>
-                Limpar Carrinho
+            <button class="category-tab" data-category="medico">
+                <i class="fas fa-medkit"></i>
+                <span>Médico</span>
+            </button>
+            <button class="category-tab" data-category="acessorios">
+                <i class="fas fa-tools"></i>
+                <span>Acessórios</span>
+            </button>
+            <button class="category-tab" data-category="armadilhas">
+                <i class="fas fa-bomb"></i>
+                <span>Armadilhas</span>
+            </button>
+            <button class="category-tab" data-category="construcao">
+                <i class="fas fa-hammer"></i>
+                <span>Construção</span>
+            </button>
+            <button class="category-tab" data-category="veiculos">
+                <i class="fas fa-car"></i>
+                <span>Veículos</span>
+            </button>
+            <button class="category-tab" data-category="roupas">
+                <i class="fas fa-tshirt"></i>
+                <span>Roupas</span>
+            </button>
+            <button class="category-tab" data-category="mochilas">
+                <i class="fas fa-backpack"></i>
+                <span>Mochilas</span>
+            </button>
+            <button class="category-tab" data-category="comidas">
+                <i class="fas fa-utensils"></i>
+                <span>Comidas</span>
+            </button>
+            <button class="category-tab" data-category="cacador">
+                <i class="fas fa-crosshairs"></i>
+                <span>Caçador</span>
             </button>
         </div>
     </div>
+</nav>
 
-    <!-- Cart Overlay -->
-    <div class="cart-overlay" id="cart-overlay"></div>
+<!-- Main Content -->
+<main class="shop-main">
+    <div class="container">
+        <div class="category-header">
+            <h2 id="category-title">Armas</h2>
+            <p id="category-description">Rifles, pistolas e armas de combate</p>
+        </div>
 
-    <!-- Loading Spinner -->
-    <div class="loading-spinner" id="loading-spinner">
-        <div class="spinner"></div>
+        <!-- Products Grid -->
+        <div class="products-grid" id="products-grid">
+            <!-- Products will be loaded here by JavaScript -->
+        </div>
+    </div>
+</main>
+
+<!-- Cart Drawer -->
+<div class="cart-drawer" id="cart-drawer">
+    <div class="cart-header">
+        <h3><i class="fas fa-shopping-cart"></i> Carrinho de Compras</h3>
+        <button class="close-cart" id="close-cart">
+            <i class="fas fa-times"></i>
+        </button>
     </div>
 
-    <script src="/static/js/auth.js"></script>
-    <script src="/static/js/shop.js"></script>
+    <div class="cart-items" id="cart-items">
+        <!-- Cart items will be loaded here -->
+    </div>
+
+    <div class="cart-footer">
+        <div class="cart-total">
+            <span>Total:</span>
+            <span class="total-amount" id="cart-total">0 DZ Coins</span>
+        </div>
+        <button class="btn-checkout" id="btn-checkout">
+            <i class="fas fa-credit-card"></i>
+            Finalizar Compra
+        </button>
+        <button class="btn-clear-cart" id="btn-clear-cart">
+            <i class="fas fa-trash"></i>
+            Limpar Carrinho
+        </button>
+    </div>
+</div>
+
+<!-- Cart Overlay -->
+<div class="cart-overlay" id="cart-overlay"></div>
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loading-spinner">
+    <div class="spinner"></div>
+</div>
+
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/shop.js"></script>
 </body>
 
 </html>
