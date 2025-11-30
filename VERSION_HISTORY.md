@@ -1,8 +1,23 @@
 # Histórico de Versões do BigodeTexas Bot
 
+## Site 9.1 (30/11/2025) 🔥
+
+**Tag:** `site-9.1-2025-11-30`
+
+**Principais Mudanças:**
+
+- **Arquitetura Completa do ChatGPT:** Implementação 100% da arquitetura sugerida para Heatmap PvP.
+- **Parser de Logs RPT:** Função `parse_rpt_line()` com suporte a múltiplos formatos.
+- **API `/api/parse_log`:** Endpoint para receber logs via POST e salvar no banco.
+- **Integração Nitrado:** Script `nitrado_to_heatmap.py` que lê logs via FTP automaticamente.
+- **Grid Clustering:** Agregação inteligente de dados para performance.
+- **Documentação:** Guia completo (`HEATMAP_GUIDE.md`) e script de testes.
+- **Backend Real:** Dados reais do banco SQLite (não mais hardcoded).
+
 ## Projeto 9 (29/11/2025)
 
 **Tag:** `projeto-9-2025-11-29`
+
 **Principais Mudanças:**
 
 - **Novo Recurso:** Mapa de Calor (Heatmap) PvP inspirado no concorrente.
