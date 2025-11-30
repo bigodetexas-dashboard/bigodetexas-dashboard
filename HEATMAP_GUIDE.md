@@ -110,13 +110,13 @@ O parser reconhece estes formatos:
 
 ### Formato 1 (Detalhado)
 
-```
+```text
 PlayerKill: Killer=John, Victim=Mike, Pos=<4500, 0, 10000>, Weapon=M4A1, Distance=120m
 ```
 
 ### Formato 2 (Simplificado)
 
-```
+```text
 Kill: John killed Mike at [4500, 0, 10000] with AKM
 ```
 
