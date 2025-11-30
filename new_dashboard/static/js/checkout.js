@@ -2,16 +2,33 @@
 // Sistema de checkout com mapa iZurvive
 
 let cart = [];
-let selectedCoords = null;
+let userBalance = 0;
 
 document.addEventListener('DOMContentLoaded', function () {
     loadCheckoutCart();
+    loadUserBalance();
     setupEventListeners();
 });
+
+// Carregar saldo do usuário
+async function loadUserBalance() {
+    try {
+        const response = await fetch('/api/user/balance');
+        const data = await response.json();
+        userBalance = data.balance || 0;
+        document.getElementById('user-balance').textContent = formatNumber(userBalance);
+        document.getElementById('current-balance').textContent = formatNumber(userBalance) + ' DZCoins';
+        updateBalanceAfter();
+    } catch (error) {
+        console.error('Erro ao carregar saldo:', error);
+        userBalance = 0;
+    }
+}
 
 function loadCheckoutCart() {
     const saved = localStorage.getItem('checkout-cart');
     if (!saved) {
+        alert('Carrinho vazio! Redirecionando para a loja...');
         window.location.href = '/shop';
         return;
     }
@@ -25,67 +42,72 @@ function renderOrderSummary() {
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     container.innerHTML = cart.map(item => `
-        <div class="order-item">
-            <div class="order-item-info">
-                <div class="order-item-name">${item.name}</div>
-                <div class="order-item-qty">Quantidade: ${item.quantity}</div>
+        <div style="display: flex; justify-content: space-between; padding: 1rem; background: rgba(30, 26, 24, 0.6); border: 1px solid rgba(90, 26, 26, 0.2); margin-bottom: 0.5rem; border-radius: 4px;">
+            <div>
+                <div style="font-weight: bold; color: var(--text-primary); margin-bottom: 0.25rem;">${item.name}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">Quantidade: ${item.quantity}</div>
             </div>
-            <div class="order-item-price">${formatNumber(item.price * item.quantity)} 💰</div>
+            <div style="color: var(--accent); font-weight: bold; font-size: 1.1rem;">${formatNumber(item.price * item.quantity)} 💰</div>
         </div>
     `).join('');
 
-    document.getElementById('order-total').textContent = `${formatNumber(total)} 💰`;
+    document.getElementById('subtotal').textContent = formatNumber(total) + ' DZCoins';
+    document.getElementById('total').textContent = formatNumber(total) + ' DZCoins';
+    updateBalanceAfter();
+}
+
+function updateBalanceAfter() {
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const balanceAfter = userBalance - total;
+    const balanceElement = document.getElementById('balance-after');
+    balanceElement.textContent = formatNumber(balanceAfter) + ' DZCoins';
+
+    if (balanceAfter < 0) {
+        balanceElement.style.color = '#ff4757';
+    } else {
+        balanceElement.style.color = 'var(--accent)';
+    }
 }
 
 function setupEventListeners() {
-    // Botão de validar coordenadas
-    document.getElementById('validate-coords').addEventListener('click', validateCoordinates);
-
     // Confirmar pedido
-    document.getElementById('confirm-order').addEventListener('click', confirmOrder);
+    document.getElementById('btn-confirm-order').addEventListener('click', confirmOrder);
+
+    // Validar coordenadas ao digitar
+    document.getElementById('coord-x').addEventListener('input', validateCoords);
+    document.getElementById('coord-z').addEventListener('input', validateCoords);
 }
 
-function validateCoordinates() {
-    const xInput = document.getElementById('coord-x');
-    const yInput = document.getElementById('coord-y');
+function validateCoords() {
+    const x = document.getElementById('coord-x').value;
+    const z = document.getElementById('coord-z').value;
 
-    const x = parseInt(xInput.value);
-    const y = parseInt(yInput.value);
+    const btn = document.getElementById('btn-confirm-order');
 
-    if (isNaN(x) || isNaN(y)) {
-        alert('Por favor, insira coordenadas válidas (números).');
-        return;
+    if (x && z && x >= 0 && x <= 15360 && z >= 0 && z <= 15360) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
     }
-
-    if (x < 0 || x > 16000 || y < 0 || y > 16000) {
-        alert('Coordenadas fora do mapa! (Use valores entre 0 e 16000)');
-        return;
-    }
-
-    selectedCoords = { x, y };
-
-    document.getElementById('selected-coords').textContent = `X: ${x}, Y: ${y}`;
-    document.getElementById('selected-coords').style.color = 'var(--success)';
-    document.getElementById('confirm-order').disabled = false;
-
-    // Feedback visual
-    const btn = document.getElementById('validate-coords');
-    const originalText = btn.textContent;
-    btn.textContent = '✅ Validado!';
-    btn.classList.add('btn-success');
-    setTimeout(() => {
-        btn.textContent = originalText;
-        btn.classList.remove('btn-success');
-    }, 2000);
 }
 
 async function confirmOrder() {
-    if (!selectedCoords) {
-        alert('Por favor, defina e valide o local de entrega!');
+    const x = parseInt(document.getElementById('coord-x').value);
+    const z = parseInt(document.getElementById('coord-z').value);
+
+    if (!x || !z || x < 0 || x > 15360 || z < 0 || z > 15360) {
+        alert('Por favor, insira coordenadas válidas (0-15360)!');
         return;
     }
 
     const orderTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    if (orderTotal > userBalance) {
+        alert(`Saldo insuficiente! Você tem ${formatNumber(userBalance)} DZCoins mas precisa de ${formatNumber(orderTotal)} DZCoins.`);
+        return;
+    }
 
     const orderData = {
         items: cart.map(item => ({
@@ -94,7 +116,7 @@ async function confirmOrder() {
             quantity: item.quantity,
             price: item.price
         })),
-        coordinates: selectedCoords,
+        coordinates: { x, z },
         total: orderTotal
     };
 

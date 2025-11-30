@@ -74,9 +74,9 @@ function saveCart() {
 // Event Listeners
 function setupEventListeners() {
     // Categorias
-    document.querySelectorAll('.category-btn').forEach(btn => {
+    document.querySelectorAll('.category-filter').forEach(btn => {
         btn.addEventListener('click', function () {
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.category-filter').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             currentCategory = this.dataset.category;
             renderItems();
@@ -172,12 +172,12 @@ function addToCart(itemCode) {
 // Abrir carrinho
 function openCart() {
     renderCart();
-    document.getElementById('cart-modal').classList.add('active');
+    document.getElementById('cart-modal').classList.add('open');
 }
 
 // Fechar carrinho
 function closeCart() {
-    document.getElementById('cart-modal').classList.remove('active');
+    document.getElementById('cart-modal').classList.remove('open');
 }
 
 // Renderizar carrinho

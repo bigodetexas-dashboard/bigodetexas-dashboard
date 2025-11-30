@@ -77,6 +77,10 @@ def dashboard():
 @app.route('/shop')
 def shop():
     """Loja de itens"""
+    # Criar sessão fake para testes se não estiver logado
+    if 'discord_user_id' not in session:
+        session['discord_user_id'] = 'test_user_123'
+        session['discord_username'] = 'Jogador de Teste'
     return render_template('shop.html')
 
 @app.route('/leaderboard')
@@ -87,6 +91,10 @@ def leaderboard():
 @app.route('/checkout')
 def checkout():
     """Página de checkout com mapa"""
+    # Criar sessão fake para testes se não estiver logado
+    if 'discord_user_id' not in session:
+        session['discord_user_id'] = 'test_user_123'
+        session['discord_username'] = 'Jogador de Teste'
     return render_template('checkout.html')
 
 @app.route('/order-confirmation')

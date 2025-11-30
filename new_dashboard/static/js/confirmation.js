@@ -10,27 +10,39 @@ document.addEventListener('DOMContentLoaded', function () {
 function loadOrderDetails() {
     const orderData = localStorage.getItem('order-confirmation');
     if (!orderData) {
-        window.location.href = '/shop';
+        console.log('Nenhum pedido encontrado, redirecionando...');
+        // Não redirecionar automaticamente para permitir testes
+        // window.location.href = '/shop';
         return;
     }
 
     const order = JSON.parse(orderData);
-    const container = document.getElementById('order-details');
+    console.log('Dados do pedido:', order);
 
-    container.innerHTML = `
-        <div class="detail-row">
-            <span>Coordenadas:</span>
-            <span>X: ${order.coordinates.x}, Y: ${order.coordinates.y}</span>
-        </div>
-        <div class="detail-row">
-            <span>Total Pago:</span>
-            <span class="text-primary">${formatNumber(order.total)} 💰</span>
-        </div>
-        <div class="detail-row">
-            <span>Tempo de Entrega:</span>
-            <span>${order.deliveryTime}</span>
-        </div>
-    `;
+    // Preencher ID do pedido (se houver)
+    if (order.id) {
+        document.getElementById('order-id').textContent = '#' + order.id;
+    } else {
+        document.getElementById('order-id').textContent = '#' + Math.floor(Math.random() * 10000);
+    }
+
+    // Preencher coordenadas
+    if (order.coordinates) {
+        const coords = order.coordinates;
+        document.getElementById('delivery-location').textContent = `X: ${coords.x}, Z: ${coords.z}`;
+
+        // Posicionar marcador no mini-mapa (proporcionalmente)
+        const marker = document.getElementById('map-marker-preview');
+        if (marker) {
+            const xPercent = (coords.x / 15360) * 100;
+            const zPercent = (coords.z / 15360) * 100;
+            marker.style.left = xPercent + '%';
+            marker.style.top = zPercent + '%';
+        }
+    }
+
+    // Limpar dados do localStorage após carregar
+    // localStorage.removeItem('order-confirmation');
 }
 
 function startCountdown() {
@@ -47,7 +59,7 @@ function startCountdown() {
         if (deliveryTime <= 0) {
             clearInterval(interval);
             timerElement.textContent = 'Entregue!';
-            timerElement.style.color = 'var(--success)';
+            timerElement.style.color = '#00ff00';
         }
     }, 1000);
 }
