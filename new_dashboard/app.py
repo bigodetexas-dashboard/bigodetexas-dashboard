@@ -430,6 +430,127 @@ def api_shop_purchase():
         cur.close()
         conn.close()
 
+@app.route('/api/heatmap')
+def api_heatmap():
+    """
+    API de Heatmap - Retorna dados agregados de eventos PvP
+    Implementação baseada na arquitetura sugerida pelo ChatGPT
+    """
+    import sys
+    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+    from database import get_heatmap_data
+    from datetime import datetime, timedelta
+    
+    # Parâmetros da query
+    time_range = request.args.get('range', '24h')  # 24h, 7d, all
+    grid_size = int(request.args.get('grid', 50))  # Tamanho do grid em unidades do jogo
+    
+    # Calcular data de início baseado no range
+    if time_range == '24h':
+        since_date = datetime.now() - timedelta(hours=24)
+    elif time_range == '7d':
+        since_date = datetime.now() - timedelta(days=7)
+    else:  # 'all'
+        since_date = datetime(2020, 1, 1)  # Data antiga para pegar tudo
+    
+    try:
+        # Buscar dados agregados do banco
+        data = get_heatmap_data(since_date, grid_size)
+        
+        return jsonify({
+            'success': True,
+            'points': data,
+            'range': time_range,
+            'grid_size': grid_size,
+            'total_events': sum(p['count'] for p in data)
+        })
+    except Exception as e:
+        print(f"Erro ao buscar heatmap: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'points': []
+        }), 500
+
+@app.route('/api/parse_log', methods=['POST'])
+def api_parse_log():
+    """
+    Endpoint para processar logs RPT do DayZ.
+    Recebe texto de log via POST e extrai eventos de morte.
+    
+    Body JSON:
+    {
+        "text": "linha1\nlinha2\nlinha3...",
+        "source": "nitrado" (opcional)
+    }
+    
+    Retorna:
+    {
+        "success": true,
+        "events_saved": 5,
+        "events_parsed": 10
+    }
+    """
+    import sys
+    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+    from database import parse_rpt_line, add_event
+    
+    data = request.get_json()
+    if not data or 'text' not in data:
+        return jsonify({
+            'success': False,
+            'error': 'Missing "text" field in request body'
+        }), 400
+    
+    log_text = data.get('text', '')
+    source = data.get('source', 'unknown')
+    
+    events_parsed = 0
+    events_saved = 0
+    
+    try:
+        for line in log_text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Tentar extrair evento da linha
+            event = parse_rpt_line(line)
+            if event:
+                events_parsed += 1
+                try:
+                    # Salvar no banco
+                    add_event(
+                        event['event_type'],
+                        event['game_x'],
+                        event['game_y'],
+                        event['game_z'],
+                        event['weapon'],
+                        event['killer_name'],
+                        event['victim_name'],
+                        event['distance'],
+                        event['timestamp']
+                    )
+                    events_saved += 1
+                except Exception as e:
+                    print(f"Erro ao salvar evento: {e}")
+        
+        return jsonify({
+            'success': True,
+            'events_parsed': events_parsed,
+            'events_saved': events_saved,
+            'source': source
+        })
+        
+    except Exception as e:
+        print(f"Erro ao processar log: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'events_parsed': events_parsed,
+            'events_saved': events_saved
+        }), 500
+
 @app.route('/logout')
 def logout():
     """Logout do usuário"""

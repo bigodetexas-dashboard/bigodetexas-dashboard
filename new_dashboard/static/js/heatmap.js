@@ -1,42 +1,30 @@
-// ==================== HEATMAP.JS ====================
+// ==================== HEATMAP.JS (Versão Real - ChatGPT Architecture) ====================
 
 document.addEventListener('DOMContentLoaded', function () {
     initMap();
     setupControls();
+    loadHeatmapData('24h'); // Carregar dados das últimas 24h por padrão
 });
 
 let map;
 let heatLayer;
 
-// Dados simulados de PvP (X, Z, Intensidade)
-// No futuro, isso virá do banco de dados (API)
-const heatData = [
-    // NWAF (Alta intensidade)
-    [4500, 10000, 1.0], [4600, 10100, 0.9], [4550, 10050, 0.8], [4700, 9900, 0.7],
-    [4400, 10200, 0.6], [4800, 9800, 0.5], [4500, 10000, 1.0], [4600, 10100, 0.9],
+// Configurações do mapa Chernarus (DayZ)
+const MAP_CONFIG = {
+    // Dimensões do mundo do jogo (coordenadas DayZ)
+    minX: 0,
+    maxX: 15360,
+    minZ: 0,
+    maxZ: 15360,
 
-    // Tisy (Alta intensidade)
-    [1500, 14000, 1.0], [1600, 14100, 0.9], [1550, 14050, 0.8], [1700, 13900, 0.7],
-
-    // Cherno (Média intensidade)
-    [6500, 2500, 0.6], [6600, 2600, 0.5], [6700, 2400, 0.4], [6400, 2700, 0.3],
-
-    // Berezino (Média intensidade)
-    [12000, 9000, 0.6], [12100, 9100, 0.5], [11900, 8900, 0.4],
-
-    // Pontos aleatórios (Baixa intensidade)
-    [8000, 8000, 0.2], [7500, 7500, 0.2], [9000, 6000, 0.2], [3000, 5000, 0.2]
-];
+    // Dimensões da imagem do mapa (pixels)
+    // iZurvive usa tiles, mas vamos trabalhar com coordenadas virtuais
+    imgWidth: 15360,
+    imgHeight: 15360
+};
 
 function initMap() {
-    // Configuração do mapa (Chernarus)
-    // Coordenadas do DayZ são (0,0) no canto inferior esquerdo até (15360, 15360)
-    // Leaflet usa (Latitude, Longitude), então precisamos converter
-
-    // Fator de conversão simples para visualização
-    const mapSize = 15360;
-    const center = [mapSize / 2, mapSize / 2];
-
+    // Inicializa Leaflet com CRS.Simple para usar coordenadas de pixels
     map = L.map('map', {
         crs: L.CRS.Simple,
         minZoom: -3,
@@ -45,75 +33,132 @@ function initMap() {
         attributionControl: false
     });
 
-    // Limites do mapa
-    const bounds = [[0, 0], [mapSize, mapSize]];
+    // Define bounds para o mapa
+    const bounds = [[0, 0], [MAP_CONFIG.imgHeight, MAP_CONFIG.imgWidth]];
 
-    // Adicionar imagem do mapa (usando iZurvive ou similar se disponível, ou tiles)
-    // Por enquanto, vamos usar uma cor de fundo sólida para simular
-    // Idealmente, usaríamos tiles do iZurvive aqui
-
-    // Usando tiles do iZurvive (Chernarus+)
+    // Adiciona tiles do iZurvive (Chernarus+)
     L.tileLayer('https://tiles.izurvive.com/maps/chernarusplus/{z}/{x}/{y}.png', {
         minZoom: 0,
         maxZoom: 5,
         noWrap: true,
-        tms: true // iZurvive usa TMS (y invertido)
+        tms: true,
+        bounds: bounds
     }).addTo(map);
 
     map.fitBounds(bounds);
-    map.setView([7680, 7680], -1); // Centro do mapa
+    map.setView([MAP_CONFIG.imgHeight / 2, MAP_CONFIG.imgWidth / 2], -1);
 
-    // Converter coordenadas DayZ (X, Z) para Leaflet (Lat, Lng)
-    // No Leaflet Simple CRS: [y, x]
-    // DayZ: X (Leste-Oeste), Z (Norte-Sul) -> Leaflet: [Z, X]
-
-    const formattedHeatData = heatData.map(point => {
-        // [Z, X, Intensidade]
-        // Inverter Y (Z) porque o mapa pode estar invertido dependendo da fonte
-        return [point[1], point[0], point[2]];
-    });
-
-    // Adicionar camada de calor
-    heatLayer = L.heatLayer(formattedHeatData, {
-        radius: 25,
-        blur: 15,
-        maxZoom: 1,
-        max: 1.0,
+    // Configuração do heatmap.js (seguindo sugestão do GPT)
+    const cfg = {
+        radius: 30,
+        maxOpacity: 0.8,
+        scaleRadius: false,
+        useLocalExtrema: false,
+        latField: 'lat',
+        lngField: 'lng',
+        valueField: 'count',
         gradient: {
-            0.4: 'blue',
+            0.0: 'blue',
+            0.4: 'cyan',
             0.6: 'lime',
+            0.8: 'yellow',
             1.0: 'red'
         }
-    }).addTo(map);
+    };
+
+    heatLayer = new HeatmapOverlay(cfg).addTo(map);
 }
 
+/**
+ * Converte coordenadas do jogo (X, Z) para coordenadas Leaflet (Lat, Lng)
+ * Implementação da fórmula sugerida pelo ChatGPT
+ */
+function gameToLatLng(gameX, gameZ) {
+    // Normaliza para 0..1
+    const nx = (gameX - MAP_CONFIG.minX) / (MAP_CONFIG.maxX - MAP_CONFIG.minX);
+    const nz = (gameZ - MAP_CONFIG.minZ) / (MAP_CONFIG.maxZ - MAP_CONFIG.minZ);
+
+    // Converte para pixels
+    const px = nx * MAP_CONFIG.imgWidth;
+    // Inverter Z porque a imagem tem origem no topo
+    const pz = (1 - nz) * MAP_CONFIG.imgHeight;
+
+    // Retorna como [lat, lng] para Leaflet CRS.Simple
+    return [pz, px];
+}
+
+/**
+ * Carrega dados do heatmap da API
+ * Implementa o fluxo sugerido pelo ChatGPT
+ */
+async function loadHeatmapData(timeRange) {
+    try {
+        console.log(`Carregando heatmap para: ${timeRange}`);
+
+        // Fetch da API (Grid Clustering já feito no backend)
+        const response = await fetch(`/api/heatmap?range=${timeRange}&grid=50`);
+        const result = await response.json();
+
+        if (!result.success) {
+            console.error('Erro ao carregar heatmap:', result.error);
+            return;
+        }
+
+        console.log(`Recebidos ${result.points.length} pontos agregados`);
+        console.log(`Total de eventos: ${result.total_events}`);
+
+        // Converte pontos do jogo para coordenadas do mapa
+        const heatmapData = {
+            data: result.points.map(point => {
+                const [lat, lng] = gameToLatLng(point.x, point.z);
+                return {
+                    lat: lat,
+                    lng: lng,
+                    count: point.count
+                };
+            })
+        };
+
+        // Atualiza a camada de calor
+        heatLayer.setData(heatmapData);
+
+        // Atualiza estatísticas na UI (opcional)
+        updateStats(result);
+
+    } catch (error) {
+        console.error('Erro ao carregar heatmap:', error);
+    }
+}
+
+/**
+ * Atualiza estatísticas exibidas (opcional)
+ */
+function updateStats(data) {
+    // Você pode adicionar elementos na UI para mostrar essas stats
+    console.log('Estatísticas:', {
+        range: data.range,
+        totalEvents: data.total_events,
+        gridSize: data.grid_size
+    });
+}
+
+/**
+ * Configura os controles de filtro (botões de tempo)
+ */
 function setupControls() {
     const buttons = document.querySelectorAll('.control-btn');
 
     buttons.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Remover classe active de todos
+            // Remove classe active de todos
             buttons.forEach(b => b.classList.remove('active'));
-            // Adicionar ao clicado
+
+            // Adiciona ao clicado
             btn.classList.add('active');
 
-            // Simular mudança de dados
+            // Recarrega dados com novo filtro
             const timeRange = btn.dataset.time;
-            updateHeatmap(timeRange);
+            loadHeatmapData(timeRange);
         });
     });
-}
-
-function updateHeatmap(range) {
-    // Aqui faríamos uma chamada API para buscar novos dados
-    console.log(`Carregando dados para: ${range}`);
-
-    // Simulação: mudar aleatoriamente a intensidade para parecer dinâmico
-    const newData = heatData.map(point => [
-        point[1],
-        point[0],
-        Math.random() // Intensidade aleatória
-    ]);
-
-    heatLayer.setLatLngs(newData);
 }

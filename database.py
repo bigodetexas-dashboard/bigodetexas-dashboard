@@ -1,430 +1,152 @@
-"""
-Sistema de Banco de Dados PostgreSQL para BigodeTexas Bot
-Gerencia players, economia, clãs e links Discord-Gamertag
-"""
+import sqlite3
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
 from datetime import datetime
-import json
-from dotenv import load_dotenv
 
-# Carrega variáveis do .env (override existing env vars)
-load_dotenv(override=True)
+DB_NAME = "pvp_events.db"
 
-# URLs de conexão
-DATABASE_URL = os.getenv('DATABASE_URL', '')
-POOLER_URL = os.getenv('SUPABASE_POOLER_URL', '')
+def init_db():
+    """Inicializa o banco de dados e cria a tabela de eventos se não existir."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    # Tabela de Eventos PvP (baseada na sugestão do GPT)
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_type TEXT,        -- 'kill', 'death', 'hit'
+        game_x REAL,            -- Coordenada X no jogo
+        game_y REAL,            -- Coordenada Y (Altura)
+        game_z REAL,            -- Coordenada Z (Norte/Sul)
+        weapon TEXT,            -- Arma usada
+        killer_name TEXT,       -- Nome do assassino
+        victim_name TEXT,       -- Nome da vítima
+        distance REAL,          -- Distância do tiro
+        timestamp DATETIME      -- Data e hora do evento
+    )
+    ''')
+    
+    # Índices para performance (muito importante para filtros de data e posição)
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON events(timestamp)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_coords ON events(game_x, game_z)')
+    
+    conn.commit()
+    conn.close()
+    print(f"Banco de dados {DB_NAME} inicializado com sucesso.")
 
-def get_connection():
-    """Cria conexão usando DATABASE_URL ou POOLER_URL."""
-    url = DATABASE_URL or POOLER_URL
-    if not url:
-        print("Erro: nenhuma URL de conexão encontrada nas variáveis de ambiente")
-        return None
-    try:
-        return psycopg2.connect(url, sslmode='require')
-    except Exception as e:
-        print(f"Erro ao conectar ao banco: {e}")
-        return None
+def add_event(event_type, x, y, z, weapon, killer, victim, distance, timestamp):
+    """Adiciona um novo evento ao banco de dados."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+    INSERT INTO events (event_type, game_x, game_y, game_z, weapon, killer_name, victim_name, distance, timestamp)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (event_type, x, y, z, weapon, killer, victim, distance, timestamp))
+    
+    conn.commit()
+    conn.close()
 
-def init_database():
-    """Cria todas as tabelas necessárias"""
-    conn = get_connection()
-    if not conn:
-        return False
-    try:
-        cur = conn.cursor()
-        # Tabela de jogadores (estatísticas)
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS players (
-                gamertag VARCHAR(255) PRIMARY KEY,
-                kills INTEGER DEFAULT 0,
-                deaths INTEGER DEFAULT 0,
-                best_killstreak INTEGER DEFAULT 0,
-                longest_shot INTEGER DEFAULT 0,
-                weapons_stats JSONB DEFAULT '{}',
-                first_seen BIGINT,
-                last_seen BIGINT
-            )
-        """)
-        # Tabela de economia
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS economy (
-                discord_id VARCHAR(255) PRIMARY KEY,
-                gamertag VARCHAR(255),
-                balance INTEGER DEFAULT 0,
-                last_daily TIMESTAMP,
-                inventory JSONB DEFAULT '{}',
-                transactions JSONB DEFAULT '[]',
-                favorites JSONB DEFAULT '[]',
-                achievements JSONB DEFAULT '{}'
-            )
-        """)
-        # Tabela de clãs
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS clans (
-                clan_name VARCHAR(255) PRIMARY KEY,
-                leader VARCHAR(255),
-                members JSONB DEFAULT '[]',
-                created_at TIMESTAMP DEFAULT NOW(),
-                total_kills INTEGER DEFAULT 0,
-                total_deaths INTEGER DEFAULT 0
-            )
-        """)
-        # Tabela de links Discord-Gamertag
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS links (
-                discord_id VARCHAR(255) PRIMARY KEY,
-                gamertag VARCHAR(255) UNIQUE,
-                linked_at TIMESTAMP DEFAULT NOW()
-            )
-        """)
-        # Tabela de heatmap
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS heatmap (
-                id SERIAL PRIMARY KEY,
-                x FLOAT NOT NULL,
-                z FLOAT NOT NULL,
-                timestamp TIMESTAMP DEFAULT NOW()
-            )
-        """)
-        conn.commit()
-        cur.close()
-        conn.close()
-        print("Tabelas criadas com sucesso!")
-        return True
-    except Exception as e:
-        print(f"Erro ao criar tabelas: {e}")
-        conn.rollback()
-        conn.close()
-        return False
+def get_heatmap_data(since_date, grid_size=50):
+    """
+    Retorna dados agregados para o heatmap.
+    Implementa o 'Grid Clustering' sugerido pelo GPT.
+    """
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    # Query inteligente que agrupa pontos próximos (buckets)
+    # Arredonda as coordenadas para o múltiplo mais próximo de 'grid_size'
+    query = f'''
+    SELECT 
+        (CAST(game_x / {grid_size} AS INT) * {grid_size}) as gx,
+        (CAST(game_z / {grid_size} AS INT) * {grid_size}) as gz,
+        COUNT(*) as intensity
+    FROM events
+    WHERE timestamp >= ? AND event_type = 'kill'
+    GROUP BY gx, gz
+    '''
+    
+    cursor.execute(query, (since_date,))
+    rows = cursor.fetchall()
+    conn.close()
+    
+    # Formata para JSON: [{x: 4500, z: 10000, count: 5}, ...]
+    return [{'x': r[0], 'z': r[1], 'count': r[2]} for r in rows]
 
-# ===== HEATMAP =====
+def parse_rpt_line(line):
+    """
+    Parser de logs RPT do DayZ.
+    Extrai eventos de morte (PlayerKill) das linhas do log.
+    
+    Formatos suportados:
+    - "PlayerKill: Killer=John, Victim=Mike, Pos=<09892.3, 0, 11234.9>, Weapon=M4A1, Distance=120m"
+    - "Kill: John killed Mike at [4500, 0, 10000] with AKM (50m)"
+    
+    Retorna dict com dados do evento ou None se não encontrar padrão.
+    """
+    import re
+    
+    # Padrão 1: Formato detalhado
+    pattern1 = r'PlayerKill: Killer=(?P<killer>[^,]+), Victim=(?P<victim>[^,]+), Pos=<(?P<x>[-0-9.]+),\s*[-0-9.]+,\s*(?P<z>[-0-9.]+)>, Weapon=(?P<weapon>[^,]+), Distance=(?P<dist>\d+)'
+    match = re.search(pattern1, line)
+    
+    if match:
+        return {
+            'event_type': 'kill',
+            'game_x': float(match.group('x')),
+            'game_y': 0.0,
+            'game_z': float(match.group('z')),
+            'weapon': match.group('weapon').strip(),
+            'killer_name': match.group('killer').strip(),
+            'victim_name': match.group('victim').strip(),
+            'distance': float(match.group('dist')),
+            'timestamp': datetime.now()
+        }
+    
+    # Padrão 2: Formato simplificado
+    pattern2 = r'Kill: (?P<killer>\w+) killed (?P<victim>\w+) at \[(?P<x>[-0-9.]+),\s*[-0-9.]+,\s*(?P<z>[-0-9.]+)\] with (?P<weapon>\w+)'
+    match = re.search(pattern2, line)
+    
+    if match:
+        return {
+            'event_type': 'kill',
+            'game_x': float(match.group('x')),
+            'game_y': 0.0,
+            'game_z': float(match.group('z')),
+            'weapon': match.group('weapon').strip(),
+            'killer_name': match.group('killer').strip(),
+            'victim_name': match.group('victim').strip(),
+            'distance': 0.0,
+            'timestamp': datetime.now()
+        }
+    
+    return None
 
-def save_heatmap_point(x, z):
-    """Salva um ponto no heatmap"""
-    conn = get_connection()
-    if not conn:
-        return False
-    try:
-        cur = conn.cursor()
-        cur.execute("INSERT INTO heatmap (x, z) VALUES (%s, %s)", (x, z))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return True
-    except Exception as e:
-        print(f"Erro ao salvar ponto no heatmap: {e}")
-        conn.close()
-        return False
-
-def get_heatmap_points():
-    """Retorna todos os pontos do heatmap"""
-    conn = get_connection()
-    if not conn:
-        return []
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT x, z FROM heatmap ORDER BY timestamp DESC LIMIT 2000") # Limite para não pesar
-        points = cur.fetchall()
-        cur.close()
-        conn.close()
-        return [dict(p) for p in points]
-    except Exception as e:
-        print(f"Erro ao buscar heatmap: {e}")
-        conn.close()
-        return []
-
-# ===== PLAYERS =====
-
-def get_player(gamertag):
-    """Busca dados de um jogador"""
-    conn = get_connection()
-    if not conn:
-        return None
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM players WHERE gamertag = %s", (gamertag,))
-        player = cur.fetchone()
-        cur.close()
-        conn.close()
-        return dict(player) if player else None
-    except Exception as e:
-        print(f"Erro ao buscar jogador: {e}")
-        conn.close()
-        return None
-
-def save_player(gamertag, data):
-    """Salva ou atualiza dados de um jogador"""
-    conn = get_connection()
-    if not conn:
-        return False
-    try:
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO players (gamertag, kills, deaths, best_killstreak, longest_shot, weapons_stats, first_seen, last_seen)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (gamertag) DO UPDATE SET
-                kills = EXCLUDED.kills,
-                deaths = EXCLUDED.deaths,
-                best_killstreak = EXCLUDED.best_killstreak,
-                longest_shot = EXCLUDED.longest_shot,
-                weapons_stats = EXCLUDED.weapons_stats,
-                last_seen = EXCLUDED.last_seen
-        """,
-            (
-                gamertag,
-                data.get('kills', 0),
-                data.get('deaths', 0),
-                data.get('best_killstreak', 0),
-                data.get('longest_shot', 0),
-                json.dumps(data.get('weapons_stats', {})),
-                data.get('first_seen'),
-                data.get('last_seen')
-            ))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return True
-    except Exception as e:
-        print(f"Erro ao salvar jogador: {e}")
-        conn.rollback()
-        conn.close()
-        return False
-
-def get_all_players():
-    """Retorna todos os jogadores"""
-    conn = get_connection()
-    if not conn:
-        return {}
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM players ORDER BY kills DESC")
-        players = cur.fetchall()
-        cur.close()
-        conn.close()
-        return {p['gamertag']: dict(p) for p in players}
-    except Exception as e:
-        print(f"Erro ao buscar jogadores: {e}")
-        conn.close()
-        return {}
-
-# ===== ECONOMY =====
-
-def get_economy(discord_id):
-    """Busca dados de economia de um usuário"""
-    conn = get_connection()
-    if not conn:
-        return None
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM economy WHERE discord_id = %s", (str(discord_id),))
-        eco = cur.fetchone()
-        cur.close()
-        conn.close()
-        return dict(eco) if eco else None
-    except Exception as e:
-        print(f"Erro ao buscar economia: {e}")
-        conn.close()
-        return None
-
-def save_economy(discord_id, data):
-    """Salva ou atualiza dados de economia"""
-    conn = get_connection()
-    if not conn:
-        return False
-    try:
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO economy (discord_id, gamertag, balance, last_daily, inventory, transactions, favorites, achievements)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (discord_id) DO UPDATE SET
-                gamertag = EXCLUDED.gamertag,
-                balance = EXCLUDED.balance,
-                last_daily = EXCLUDED.last_daily,
-                inventory = EXCLUDED.inventory,
-                transactions = EXCLUDED.transactions,
-                favorites = EXCLUDED.favorites,
-                achievements = EXCLUDED.achievements
-        """,
-            (
-                str(discord_id),
-                data.get('gamertag'),
-                data.get('balance', 0),
-                data.get('last_daily'),
-                json.dumps(data.get('inventory', {})),
-                json.dumps(data.get('transactions', [])),
-                json.dumps(data.get('favorites', [])),
-                json.dumps(data.get('achievements', {}))
-            ))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return True
-    except Exception as e:
-        print(f"Erro ao salvar economia: {e}")
-        conn.rollback()
-        conn.close()
-        return False
-
-def get_all_economy():
-    """Retorna todos os dados de economia"""
-    conn = get_connection()
-    if not conn:
-        return {}
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM economy")
-        economies = cur.fetchall()
-        cur.close()
-        conn.close()
-        return {e['discord_id']: dict(e) for e in economies}
-    except Exception as e:
-        print(f"Erro ao buscar economias: {e}")
-        conn.close()
-        return {}
-
-# ===== LINKS =====
-
-def save_link(discord_id, gamertag):
-    """Salva ou atualiza link Discord-Gamertag"""
-    conn = get_connection()
-    if not conn:
-        return False
-    try:
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO links (discord_id, gamertag)
-            VALUES (%s, %s)
-            ON CONFLICT (discord_id) DO UPDATE SET
-                gamertag = EXCLUDED.gamertag
-        """, (str(discord_id), gamertag))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return True
-    except Exception as e:
-        print(f"Erro ao salvar link: {e}")
-        conn.rollback()
-        conn.close()
-        return False
-
-def get_link_by_discord(discord_id):
-    """Busca gamertag vinculado a um Discord ID"""
-    conn = get_connection()
-    if not conn:
-        return None
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT gamertag FROM links WHERE discord_id = %s", (str(discord_id),))
-        link = cur.fetchone()
-        cur.close()
-        conn.close()
-        return link['gamertag'] if link else None
-    except Exception as e:
-        print(f"Erro ao buscar link: {e}")
-        conn.close()
-        return None
-
-def get_link_by_gamertag(gamertag):
-    """Busca Discord ID vinculado a um gamertag"""
-    conn = get_connection()
-    if not conn:
-        return None
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT discord_id FROM links WHERE gamertag = %s", (gamertag,))
-        link = cur.fetchone()
-        cur.close()
-        conn.close()
-        return link['discord_id'] if link else None
-    except Exception as e:
-        print(f"Erro ao buscar link: {e}")
-        conn.close()
-        return None
-
-def get_all_links():
-    """Retorna todos os links"""
-    conn = get_connection()
-    if not conn:
-        return {}
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM links")
-        links = cur.fetchall()
-        cur.close()
-        conn.close()
-        return {l['discord_id']: l['gamertag'] for l in links}
-    except Exception as e:
-        print(f"Erro ao buscar links: {e}")
-        conn.close()
-        return {}
-
-# ===== CLANS =====
-
-def save_clan(clan_name, data):
-    """Salva ou atualiza um clã"""
-    conn = get_connection()
-    if not conn:
-        return False
-    try:
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO clans (clan_name, leader, members, total_kills, total_deaths)
-            VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT (clan_name) DO UPDATE SET
-                leader = EXCLUDED.leader,
-                members = EXCLUDED.members,
-                total_kills = EXCLUDED.total_kills,
-                total_deaths = EXCLUDED.total_deaths
-        """, (
-            clan_name,
-            data.get('leader'),
-            json.dumps(data.get('members', [])),
-            data.get('total_kills', 0),
-            data.get('total_deaths', 0)
-        ))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return True
-    except Exception as e:
-        print(f"Erro ao salvar clã: {e}")
-        conn.rollback()
-        conn.close()
-        return False
-
-def get_clan(clan_name):
-    """Busca dados de um clã"""
-    conn = get_connection()
-    if not conn:
-        return None
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM clans WHERE clan_name = %s", (clan_name,))
-        clan = cur.fetchone()
-        cur.close()
-        conn.close()
-        return dict(clan) if clan else None
-    except Exception as e:
-        print(f"Erro ao buscar clã: {e}")
-        conn.close()
-        return None
-
-def get_all_clans():
-    """Retorna todos os clãs"""
-    conn = get_connection()
-    if not conn:
-        return {}
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT * FROM clans")
-        clans = cur.fetchall()
-        cur.close()
-        conn.close()
-        return {c['clan_name']: dict(c) for c in clans}
-    except Exception as e:
-        print(f"Erro ao buscar clãs: {e}")
-        conn.close()
-        return {}
+# Inicializar ao rodar o script
+if __name__ == "__main__":
+    init_db()
+    
+    # Adicionar alguns dados de teste se estiver vazio
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) FROM events')
+    if cursor.fetchone()[0] == 0:
+        print("Adicionando dados de teste...")
+        import random
+        from datetime import timedelta
+        
+        # Gerar 100 mortes aleatórias em NWAF (aprox X: 4500, Z: 10000)
+        now = datetime.now()
+        for _ in range(100):
+            x = 4500 + random.uniform(-300, 300)
+            z = 10000 + random.uniform(-300, 300)
+            add_event('kill', x, 0, z, 'M4-A1', 'Survivor', 'Bandit', 50, now - timedelta(hours=random.randint(0, 24)))
+            
+        # Gerar 50 mortes em Cherno (aprox X: 6500, Z: 2500)
+        for _ in range(50):
+            x = 6500 + random.uniform(-200, 200)
+            z = 2500 + random.uniform(-200, 200)
+            add_event('kill', x, 0, z, 'BK-18', 'Freshie', 'Camper', 10, now - timedelta(hours=random.randint(0, 24)))
+            
+        print("Dados de teste adicionados.")
+    conn.close()
