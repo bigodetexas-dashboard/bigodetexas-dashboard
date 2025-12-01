@@ -1,63 +1,51 @@
 @echo off
-echo ========================================
-echo   TEXAS BIGODE BOT - INICIANDO
-echo ========================================
+chcp 65001 >nul
+title 🚀 BigodeTexas - Inicialização Rápida
+mode con: cols=100 lines=30
+color 0B
+
+cls
+echo.
+echo    ╔══════════════════════════════════════════════════════════════════════════════╗
+echo    ║                                                                              ║
+echo    ║                        🤠 BIGODE TEXAS BOT 🤠                                ║
+echo    ║                    Servidor Brasil Sul - Xbox                                ║
+echo    ║                                                                              ║
+echo    ╚══════════════════════════════════════════════════════════════════════════════╝
+echo.
+echo    ┌────────────────────────────────────────────────────────────────────────────┐
+echo    │  🚀 MODO RÁPIDO - Iniciando sem diagnóstico...                             │
+echo    └────────────────────────────────────────────────────────────────────────────┘
 echo.
 
-REM Verificar se .env existe
-if not exist .env (
-    echo [ERRO] Arquivo .env nao encontrado!
-    echo.
-    echo Por favor, copie .env.example para .env e configure suas credenciais.
-    echo Comando: copy .env.example .env
-    echo.
-    pause
-    exit /b 1
-)
-
-echo [OK] Arquivo .env encontrado
-echo.
-
-REM Verificar se Python está instalado
+:: Verificação mínima
 python --version >nul 2>&1
-if errorlevel 1 (
-    echo [ERRO] Python nao encontrado!
-    echo.
-    echo Instale Python 3.11+ de https://python.org
-    echo.
+if %errorlevel% neq 0 (
+    color 0C
+    echo    ❌ Python não encontrado! Use run_bot.bat para diagnóstico completo.
     pause
-    exit /b 1
+    exit
 )
 
-echo [OK] Python instalado
+echo    ✅ Python OK
+echo    🔄 Carregando bot...
 echo.
+timeout /t 1 /nobreak >nul
 
-REM Instalar dependências
-echo [INFO] Instalando dependencias...
-pip install -q discord.py aiohttp python-dotenv flask
-
-if errorlevel 1 (
-    echo [ERRO] Falha ao instalar dependencias!
-    pause
-    exit /b 1
-)
-
-echo [OK] Dependencias instaladas
+cls
 echo.
-
-REM Iniciar bot
-echo ========================================
-echo   BOT INICIANDO...
-echo ========================================
-echo.
-echo Pressione Ctrl+C para parar o bot
+echo    ╔══════════════════════════════════════════════════════════════════════════════╗
+echo    ║  🟢 BOT ONLINE                                                               ║
+echo    ╚══════════════════════════════════════════════════════════════════════════════╝
 echo.
 
 python bot_main.py
 
-REM Se o bot parar
+:: Se parar
+color 0C
 echo.
-echo ========================================
-echo   BOT ENCERRADO
-echo ========================================
+echo    ╔══════════════════════════════════════════════════════════════════════════════╗
+echo    ║  🔴 BOT OFFLINE                                                              ║
+echo    ╚══════════════════════════════════════════════════════════════════════════════╝
+echo.
 pause

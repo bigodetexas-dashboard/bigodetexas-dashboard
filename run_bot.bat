@@ -1,47 +1,109 @@
 @echo off
-title BigodeTexas Bot 🤠
-color 0A
+chcp 65001 >nul
+title 🤠 BigodeTexas Bot - Sistema de Gerenciamento DayZ
+mode con: cols=100 lines=35
+color 0B
 
-echo ==========================================
-echo      INICIANDO BIGODETEXAS - DIAGNOSTICO
-echo ==========================================
+cls
+echo.
+echo    ╔══════════════════════════════════════════════════════════════════════════════╗
+echo    ║                                                                              ║
+echo    ║   ██████╗ ██╗ ██████╗  ██████╗ ██████╗ ███████╗████████╗███████╗██╗  ██╗   ║
+echo    ║   ██╔══██╗██║██╔════╝ ██╔═══██╗██╔══██╗██╔════╝╚══██╔══╝██╔════╝╚██╗██╔╝   ║
+echo    ║   ██████╔╝██║██║  ███╗██║   ██║██║  ██║█████╗     ██║   █████╗   ╚███╔╝    ║
+echo    ║   ██╔══██╗██║██║   ██║██║   ██║██║  ██║██╔══╝     ██║   ██╔══╝   ██╔██╗    ║
+echo    ║   ██████╔╝██║╚██████╔╝╚██████╔╝██████╔╝███████╗   ██║   ███████╗██╔╝ ██╗   ║
+echo    ║   ╚═════╝ ╚═╝ ╚═════╝  ╚═════╝ ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝   ║
+echo    ║                                                                              ║
+echo    ║                    🎮 SERVIDOR BRASIL SUL - XBOX 🎮                          ║
+echo    ║                    Sistema de Gerenciamento v2.0                             ║
+echo    ╚══════════════════════════════════════════════════════════════════════════════╝
+echo.
+echo    ┌────────────────────────────────────────────────────────────────────────────┐
+echo    │  📋 INICIANDO DIAGNÓSTICO DO SISTEMA...                                    │
+echo    └────────────────────────────────────────────────────────────────────────────┘
 echo.
 
-:: Verificar se Python esta instalado
+:: Verificar Python
+echo    [1/4] 🐍 Verificando Python...
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
     color 0C
-    echo [ERRO] Python nao encontrado!
-    echo Por favor, instale o Python em https://www.python.org/downloads/
-    echo Marque a opcao "Add Python to PATH" na instalacao.
+    echo    ❌ ERRO: Python não encontrado!
+    echo.
+    echo    📥 Baixe em: https://www.python.org/downloads/
+    echo    ⚠️  Marque "Add Python to PATH" na instalação
     echo.
     pause
     exit
 )
+for /f "tokens=2" %%i in ('python --version 2^>^&1') do set PYVER=%%i
+echo    ✅ Python %PYVER% detectado
+timeout /t 1 /nobreak >nul
 
-echo [OK] Python encontrado.
-echo.
-
-:: Instalar dependencias
-echo Verificando dependencias...
-pip install discord.py requests >nul 2>&1
+:: Verificar dependências
+echo    [2/4] 📦 Verificando dependências...
+pip show discord.py >nul 2>&1
 if %errorlevel% neq 0 (
+    echo    ⚙️  Instalando discord.py...
+    pip install discord.py >nul 2>&1
+)
+pip show requests >nul 2>&1
+if %errorlevel% neq 0 (
+    echo    ⚙️  Instalando requests...
+    pip install requests >nul 2>&1
+)
+echo    ✅ Todas as dependências OK
+timeout /t 1 /nobreak >nul
+
+:: Verificar arquivo .env
+echo    [3/4] 🔐 Verificando configurações...
+if not exist .env (
     color 0E
-    echo [AVISO] Nao foi possivel instalar dependencias automaticamente.
-    echo Tentando rodar mesmo assim...
+    echo    ⚠️  AVISO: Arquivo .env não encontrado!
+    echo    📝 Copie .env.example para .env e configure
+    timeout /t 2 /nobreak >nul
 ) else (
-    echo [OK] Dependencias verificadas.
+    echo    ✅ Configurações carregadas
+    timeout /t 1 /nobreak >nul
 )
 
+:: Verificar conexão
+echo    [4/4] 🌐 Testando conectividade...
+ping -n 1 discord.com >nul 2>&1
+if %errorlevel% neq 0 (
+    color 0E
+    echo    ⚠️  AVISO: Sem conexão com Discord
+) else (
+    echo    ✅ Conexão OK
+)
+timeout /t 1 /nobreak >nul
+
 echo.
-echo Iniciando bot_main.py...
-echo ------------------------------------------
-python bot_main.py
-echo ------------------------------------------
+echo    ┌────────────────────────────────────────────────────────────────────────────┐
+echo    │  ✨ DIAGNÓSTICO COMPLETO - INICIANDO BOT...                                │
+echo    └────────────────────────────────────────────────────────────────────────────┘
+echo.
+timeout /t 2 /nobreak >nul
+
+cls
+echo.
+echo    ╔══════════════════════════════════════════════════════════════════════════════╗
+echo    ║  🤖 BOT ATIVO - Monitorando Servidor DayZ                                    ║
+echo    ╚══════════════════════════════════════════════════════════════════════════════╝
 echo.
 
+python bot_main.py
+
+:: Se o bot parar
+cls
 color 0C
-echo O BOT PAROU DE RODAR.
-echo Verifique as mensagens de erro acima.
 echo.
-pause
+echo    ╔══════════════════════════════════════════════════════════════════════════════╗
+echo    ║  ⚠️  BOT DESCONECTADO                                                        ║
+echo    ╚══════════════════════════════════════════════════════════════════════════════╝
+echo.
+echo    O bot parou de executar. Verifique os erros acima.
+echo.
+echo    Pressione qualquer tecla para fechar...
+pause >nul
