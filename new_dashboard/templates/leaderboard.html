@@ -35,59 +35,52 @@
 
     <div class="container leaderboard-container">
         <div class="leaderboard-header">
-            <h1><i class="ri-trophy-line"></i> Hall da Fama</h1>
-            <p>Veja quem são as lendas do SERV. BRASIL SUL - XBOX</p>
+            <h1><i class="ri-trophy-fill text-accent"></i> Rankings Globais</h1>
+            <p>Os melhores sobreviventes do servidor em diversas categorias.</p>
         </div>
 
-        <div class="rankings-grid">
-            <!-- Menu Lateral de Categorias -->
-            <div class="rankings-menu">
-                <button class="rank-btn active" data-type="money">
-                    <i class="ri-money-dollar-circle-line"></i> Mais Rico
-                </button>
-                <button class="rank-btn" data-type="kills">
-                    <i class="ri-skull-line"></i> Mais Mata Players
-                </button>
-                <button class="rank-btn" data-type="deaths">
-                    <i class="ri-ghost-line"></i> Mais Morre
-                </button>
-                <button class="rank-btn" data-type="kd">
-                    <i class="ri-sword-line"></i> Melhor K/D
-                </button>
-                <button class="rank-btn" data-type="zombie_kills">
-                    <i class="ri-virus-line"></i> Mais Mata Zumbis
-                </button>
-                <button class="rank-btn" data-type="distance_traveled">
-                    <i class="ri-footprint-line"></i> Mais Anda no Mapa
-                </button>
-                <button class="rank-btn" data-type="distance_driven">
-                    <i class="ri-roadster-line"></i> Mais Anda de Veículo
-                </button>
-                <button class="rank-btn" data-type="logins">
-                    <i class="ri-login-circle-line"></i> Mais Desloga/Reloga
-                </button>
-                <button class="rank-btn" data-type="base_builds">
-                    <i class="ri-hammer-line"></i> Mais Constrói Bases
-                </button>
-                <button class="rank-btn" data-type="lock_raids">
-                    <i class="ri-lock-unlock-line"></i> Mais Roda Cadeado
-                </button>
-            </div>
+        <!-- Filtros de Categoria -->
+        <div class="leaderboard-controls">
+            <button class="control-btn active" data-category="kills"><i class="ri-sword-line"></i> Kills</button>
+            <button class="control-btn" data-category="deaths"><i class="ri-skull-line"></i> Mortes</button>
+            <button class="control-btn" data-category="kd"><i class="ri-percent-line"></i> K/D Ratio</button>
+            <button class="control-btn" data-category="balance"><i class="ri-money-dollar-circle-line"></i>
+                Riqueza</button>
+            <button class="control-btn" data-category="playtime"><i class="ri-time-line"></i> Tempo Jogado</button>
+            <button class="control-btn" data-category="longest_shot"><i class="ri-crosshair-2-line"></i> Longest
+                Shot</button>
+        </div>
 
-            <!-- Conteúdo do Ranking -->
-            <div class="rankings-content">
-                <!-- Pódio (Top 3) -->
-                <div class="podium" id="podium-container">
-                    <!-- Preenchido via JS -->
-                </div>
+        <!-- Pódio (Top 3) -->
+        <div class="podium-section" id="podium-container">
+            <!-- Preenchido via JS -->
+        </div>
 
-                <!-- Lista Completa -->
-                <div class="ranking-list" id="ranking-list">
+        <!-- Tabela Completa -->
+        <div class="leaderboard-table-container">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Jogador</th>
+                        <th id="stat-header">Kills</th>
+                        <th>Detalhes</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
                     <!-- Preenchido via JS -->
-                </div>
-            </div>
+                </tbody>
+            </table>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+            <img src="{{ url_for('static', filename='img/logo_texas.png') }}" alt="Logo" style="height: 50px;">
+            <p style="margin: 0;">&copy; 2025 SERV. BRASIL SUL - XBOX. Todos os direitos reservados.</p>
+        </div>
+    </footer>
 
     <script src="{{ url_for('static', filename='js/leaderboard.js') }}"></script>
 </body>
