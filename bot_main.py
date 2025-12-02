@@ -1043,10 +1043,20 @@ async def parse_log_line(line):
                 
                 elif reason.startswith("UnauthorizedBase"):
                     base_name = reason.split(":")[1]
-                    print(f"ALERTA: Construção ilegal de {player_name} na base {base_name}")
-                    channel = bot.get_channel(load_json(CONFIG_FILE).get("alarm_channel"))
-                    if channel:
-                        await channel.send(f"🚨 **ALERTA DE INVASÃO**\n**{player_name}** tentou colocar **{item_name}** na área protegida da base **{base_name}**!")
+                    print(f"BANINDO {player_name} por construção ilegal na base {base_name}!")
+                    
+                    # Alerta no canal de Alarmes (mantido para registro)
+                    alarm_channel = bot.get_channel(load_json(CONFIG_FILE).get("alarm_channel"))
+                    if alarm_channel:
+                        await alarm_channel.send(f"🚨 **ALERTA DE INVASÃO**\n**{player_name}** tentou colocar **{item_name}** na área protegida da base **{base_name}**!")
+                    
+                    # Alerta no canal de Banimentos
+                    ban_channel = bot.get_channel(load_json(CONFIG_FILE).get("ban_channel"))
+                    if ban_channel:
+                         await ban_channel.send(f"🚫 **BANIMENTO AUTOMÁTICO**\nO jogador **{player_name}** foi banido por construir ilegalmente na base **{base_name}** (Não autorizado)!")
+
+                    # Executa Banimento Real
+                    ban_player(player_name, f"Construcao Ilegal em Base: {base_name}")
                     
         except Exception as e:
             print(f"Erro parse placement: {e}")
