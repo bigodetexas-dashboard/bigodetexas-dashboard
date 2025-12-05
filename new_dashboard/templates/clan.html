@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clã - SERV. BRASIL SUL - XBOX</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <img src="{{ url_for('static', filename='img/logo_texas.png') }}" alt="Logo"
+                    style="height: 40px; margin-right: 10px;">
+                <span style="font-size: 1.5rem;">SERV. BRASIL SUL - XBOX</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/" class="navbar-link"><i class="ri-home-line"></i> Início</a></li>
+                <li><a href="/shop" class="navbar-link"><i class="ri-store-2-line"></i> Loja</a></li>
+                <li><a href="/leaderboard" class="navbar-link"><i class="ri-trophy-line"></i> Rankings</a></li>
+                <li><a href="/base" class="navbar-link"><i class="ri-map-pin-line"></i> Base</a></li>
+                <li><a href="/clan" class="navbar-link active"><i class="ri-team-line"></i> Clã</a></li>
+                <li><a href="/banco" class="navbar-link"><i class="ri-bank-line"></i> Banco Sul</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 1200px; margin: 2rem auto; padding: 0 2rem;">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h1><i class="ri-team-fill" style="color: var(--accent);"></i> Gerenciamento de Clã</h1>
+            <p>Crie ou gerencie seu clã</p>
+        </div>
+
+        <!-- Criar Clã -->
+        <div id="create-clan-section"
+            style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 1rem; margin-bottom: 2rem;">
+            <h2>Criar Novo Clã</h2>
+            <div style="max-width: 600px; margin: 0 auto;">
+                <div style="margin-bottom: 1rem;">
+                    <label>Nome do Clã</label>
+                    <input type="text" id="clan-name" class="search-input" placeholder="Ex: Jardineiros" maxlength="50">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label>Cor 1</label>
+                        <input type="color" id="clan-color1" value="#FF0000"
+                            style="width: 100%; height: 50px; border-radius: 0.5rem;">
+                    </div>
+                    <div>
+                        <label>Cor 2</label>
+                        <input type="color" id="clan-color2" value="#00FF00"
+                            style="width: 100%; height: 50px; border-radius: 0.5rem;">
+                    </div>
+                </div>
+                <button onclick="createClan()" class="btn btn-primary" style="width: 100%;">
+                    <i class="ri-add-line"></i> Criar Clã
+                </button>
+            </div>
+        </div>
+
+        <!-- Informações do Clã -->
+        <div id="clan-info" style="display: none;">
+            <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 1rem;">
+                <h2 id="clan-name-display"></h2>
+                <div id="clan-members-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+            <img src="{{ url_for('static', filename='img/logo_texas.png') }}" alt="Logo" style="height: 50px;">
+            <p style="margin: 0;">&copy; 2025 SERV. BRASIL SUL - XBOX. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        async function createClan() {
+            const name = document.getElementById('clan-name').value;
+            const color1 = document.getElementById('clan-color1').value;
+            const color2 = document.getElementById('clan-color2').value;
+
+            if (!name) {
+                alert('Digite um nome para o clã!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/clan/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, color1, color2 })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Clã criado com sucesso!');
+                    location.reload();
+                } else {
+                    alert(data.error || 'Erro ao criar clã');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao criar clã');
+            }
+        }
+    </script>
+</body>
+
+</html>

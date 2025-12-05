@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco Sul - SERV. BRASIL SUL - XBOX</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        .banco-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .banco-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border: 2px solid #00ff00;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .banco-title {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff00;
+            text-align: center;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px #00ff00;
+            margin-bottom: 0.5rem;
+        }
+
+        .banco-subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff00;
+            text-align: center;
+            opacity: 0.7;
+        }
+
+        .terminal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .terminal-section {
+            background: #0a0a0a;
+            border: 2px solid #00ff00;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            font-family: 'Share Tech Mono', monospace;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        }
+
+        .terminal-header {
+            color: #00ff00;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #00ff00;
+        }
+
+        .balance-display {
+            font-size: 3rem;
+            color: #00ff00;
+            text-align: center;
+            margin: 2rem 0;
+            text-shadow: 0 0 20px #00ff00;
+        }
+
+        .extrato-line {
+            color: #00ff00;
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+            font-size: 0.9rem;
+        }
+
+        .terminal-input {
+            background: #000;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+            font-family: 'Share Tech Mono', monospace;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .terminal-button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.25rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .terminal-button:hover {
+            box-shadow: 0 0 15px #00ff00;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 1024px) {
+            .terminal-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <img src="{{ url_for('static', filename='img/logo_texas.png') }}" alt="Logo"
+                    style="height: 40px; margin-right: 10px;">
+                <span style="font-size: 1.5rem;">SERV. BRASIL SUL - XBOX</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="/" class="navbar-link"><i class="ri-home-line"></i> Início</a></li>
+                <li><a href="/shop" class="navbar-link"><i class="ri-store-2-line"></i> Loja</a></li>
+                <li><a href="/leaderboard" class="navbar-link"><i class="ri-trophy-line"></i> Rankings</a></li>
+                <li><a href="/base" class="navbar-link"><i class="ri-map-pin-line"></i> Base</a></li>
+                <li><a href="/clan" class="navbar-link"><i class="ri-team-line"></i> Clã</a></li>
+                <li><a href="/banco" class="navbar-link active"><i class="ri-bank-line"></i> Banco Sul</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="banco-container">
+        <div class="banco-header">
+            <div class="banco-title">█ BANCO SUL █</div>
+            <div class="banco-subtitle">SISTEMA FINANCEIRO MILITAR</div>
+        </div>
+
+        <div class="terminal-grid">
+            <!-- Saldo e Conta -->
+            <div class="terminal-section">
+                <div class="terminal-header">► CONTA CORRENTE</div>
+                <div style="color: #00ff00; margin-bottom: 1rem;">
+                    <div>TITULAR: <span id="user-name">CARREGANDO...</span></div>
+                    <div>CONTA: <span id="user-id">000000</span></div>
+                </div>
+                <div class="balance-display" id="balance-display">$0</div>
+                <div style="text-align: center; color: #00ff00; opacity: 0.7;">SALDO DISPONÍVEL</div>
+            </div>
+
+            <!-- Extrato -->
+            <div class="terminal-section">
+                <div class="terminal-header">► EXTRATO - ÚLTIMAS OPERAÇÕES</div>
+                <div id="extrato-container" style="max-height: 300px; overflow-y: auto;">
+                    <div class="extrato-line">[CARREGANDO TRANSAÇÕES...]</div>
+                </div>
+            </div>
+
+            <!-- Transferência -->
+            <div class="terminal-section">
+                <div class="terminal-header">► TRANSFERÊNCIA</div>
+                <label style="color: #00ff00; font-size: 0.9rem;">DESTINATÁRIO (Discord ID):</label>
+                <input type="text" id="transfer-to" class="terminal-input" placeholder="Digite o Discord ID">
+
+                <label style="color: #00ff00; font-size: 0.9rem;">VALOR:</label>
+                <input type="number" id="transfer-amount" class="terminal-input" placeholder="0">
+
+                <label style="color: #00ff00; font-size: 0.9rem;">DESCRIÇÃO:</label>
+                <input type="text" id="transfer-desc" class="terminal-input" placeholder="Opcional">
+
+                <button class="terminal-button" onclick="transferir()">
+                    ► EXECUTAR TRANSFERÊNCIA
+                </button>
+            </div>
+
+            <!-- Banco do Clã -->
+            <div class="terminal-section">
+                <div class="terminal-header">► BANCO DO CLÃ</div>
+                <div style="color: #00ff00; text-align: center; padding: 2rem;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">$0</div>
+                    <div style="opacity: 0.7;">SALDO DO CLÃ</div>
+                </div>
+                <div style="color: #00ff00; opacity: 0.5; font-size: 0.8rem; text-align: center;">
+                    [FUNCIONALIDADE EM DESENVOLVIMENTO]
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+            <img src="{{ url_for('static', filename='img/logo_texas.png') }}" alt="Logo" style="height: 50px;">
+            <p style="margin: 0;">&copy; 2025 SERV. BRASIL SUL - XBOX. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Carregar saldo
+        async function loadBalance() {
+            try {
+                const response = await fetch('/api/user/balance');
+                const data = await response.json();
+                document.getElementById('balance-display').textContent = `$${data.balance.toLocaleString()}`;
+            } catch (error) {
+                console.error('Erro ao carregar saldo:', error);
+            }
+        }
+
+        // Transferir
+        async function transferir() {
+            const to = document.getElementById('transfer-to').value;
+            const amount = parseInt(document.getElementById('transfer-amount').value);
+            const desc = document.getElementById('transfer-desc').value;
+
+            if (!to || !amount) {
+                alert('Preencha todos os campos!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/banco/transfer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to_user_id: to, amount, description: desc })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Transferência realizada com sucesso!');
+                    loadBalance();
+                    document.getElementById('transfer-to').value = '';
+                    document.getElementById('transfer-amount').value = '';
+                    document.getElementById('transfer-desc').value = '';
+                } else {
+                    alert(data.error || 'Erro ao transferir');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao transferir');
+            }
+        }
+
+        // Inicializar
+        loadBalance();
+    </script>
+</body>
+
+</html>

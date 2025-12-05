@@ -111,6 +111,22 @@ def agradecimentos():
     """Página de agradecimentos aos amigos"""
     return render_template('agradecimentos.html')
 
+@app.route('/base')
+def base():
+    """Página de registro de base"""
+    return render_template('base.html')
+
+@app.route('/clan')
+def clan():
+    """Página de gerenciamento de clã"""
+    return render_template('clan.html')
+
+@app.route('/banco')
+def banco():
+    """Página do Banco Sul"""
+    return render_template('banco.html')
+
+
 # ==================== API ENDPOINTS ====================
 
 @app.route('/api/stats')
@@ -844,7 +860,122 @@ def api_heatmap_hourly():
             'hourly': [0] * 24
         }), 500
 
+# ==================== APIs BASE, CLAN E BANCO ====================
+
+@app.route('/api/base/register', methods=['POST'])
+def api_base_register():
+    """Registrar nova base"""
+    try:
+        data = request.get_json()
+        user_id = session.get('discord_user_id', 'test_user_123')
+        
+        conn = get_db()
+        cur = conn.cursor()
+        
+        # Verificar se usuário já tem base
+        cur.execute("SELECT id FROM bases WHERE owner_id = %s", (user_id,))
+        if cur.fetchone():
+            conn.close()
+            return jsonify({'error': 'Você já possui uma base registrada'}), 400
+        
+        # Inserir base
+        cur.execute("""
+            INSERT INTO bases (owner_id, coord_x, coord_y, coord_z, name)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id
+        """, (user_id, data['coord_x'], data['coord_y'], data.get('coord_z', 0), data.get('name')))
+        
+        base_id = cur.fetchone()[0]
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'base_id': base_id})
+    except Exception as e:
+        print(f"Erro ao registrar base: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/clan/create', methods=['POST'])
+def api_clan_create():
+    """Criar novo clã"""
+    try:
+        data = request.get_json()
+        user_id = session.get('discord_user_id', 'test_user_123')
+        
+        conn = get_db()
+        cur = conn.cursor()
+        
+        # Verificar se usuário já está em um clã
+        cur.execute("SELECT clan_id FROM clan_members WHERE user_id = %s", (user_id,))
+        if cur.fetchone():
+            conn.close()
+            return jsonify({'error': 'Você já está em um clã'}), 400
+        
+        # Criar clã
+        cur.execute("""
+            INSERT INTO clans (name, leader_id, symbol_color1, symbol_color2, symbol_icon)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id
+        """, (data['name'], user_id, data.get('color1', '#FF0000'), 
+              data.get('color2', '#00FF00'), data.get('icon', 'shield')))
+        
+        clan_id = cur.fetchone()[0]
+        
+        # Adicionar líder como membro
+        cur.execute("""
+            INSERT INTO clan_members (clan_id, user_id, role)
+            VALUES (%s, %s, 'leader')
+        """, (clan_id, user_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True, 'clan_id': clan_id})
+    except Exception as e:
+        print(f"Erro ao criar clã: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/banco/transfer', methods=['POST'])
+def api_banco_transfer():
+    """Transferir dinheiro entre jogadores"""
+    try:
+        data = request.get_json()
+        from_user_id = session.get('discord_user_id', 'test_user_123')
+        to_user_id = data['to_user_id']
+        amount = int(data['amount'])
+        
+        if amount <= 0:
+            return jsonify({'error': 'Valor inválido'}), 400
+        
+        conn = get_db()
+        cur = conn.cursor()
+        
+        # Verificar saldo
+        cur.execute("SELECT balance FROM users WHERE discord_id = %s", (from_user_id,))
+        result = cur.fetchone()
+        if not result or result[0] < amount:
+            conn.close()
+            return jsonify({'error': 'Saldo insuficiente'}), 400
+        
+        # Realizar transferência
+        cur.execute("UPDATE users SET balance = balance - %s WHERE discord_id = %s", (amount, from_user_id))
+        cur.execute("UPDATE users SET balance = balance + %s WHERE discord_id = %s", (amount, to_user_id))
+        
+        # Registrar transação
+        cur.execute("""
+            INSERT INTO transactions (from_user_id, to_user_id, amount, transaction_type, description)
+            VALUES (%s, %s, %s, 'transfer', %s)
+        """, (from_user_id, to_user_id, amount, data.get('description', 'Transferência')))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Erro ao transferir: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/logout')
+
 def logout():
     """Logout do usuário"""
     session.clear()
