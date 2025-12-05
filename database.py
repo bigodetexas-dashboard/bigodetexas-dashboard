@@ -150,3 +150,89 @@ if __name__ == "__main__":
             
         print("Dados de teste adicionados.")
     conn.close()
+
+def get_all_clans():
+    """Retorna todos os clãs do arquivo clans.json"""
+    import json
+    if not os.path.exists("clans.json"):
+        return {}
+    try:
+        with open("clans.json", 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except:
+        return {}
+
+def get_all_players():
+    """Retorna todos os jogadores do arquivo players_db.json"""
+    import json
+    if not os.path.exists("players_db.json"):
+        return {}
+    try:
+        with open("players_db.json", 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except:
+        return {}
+        
+def get_economy(user_id):
+    """Retorna dados de economia do arquivo economy.json"""
+    import json
+    if not os.path.exists("economy.json"):
+        return {}
+    try:
+        with open("economy.json", 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get(str(user_id), {})
+    except:
+        return {}
+
+def save_economy(user_id, data):
+    """Salva dados de economia no arquivo economy.json"""
+    import json
+    economy_data = {}
+    if os.path.exists("economy.json"):
+        try:
+            with open("economy.json", 'r', encoding='utf-8') as f:
+                economy_data = json.load(f)
+        except:
+            pass
+    
+    economy_data[str(user_id)] = data
+    
+    with open("economy.json", 'w', encoding='utf-8') as f:
+        json.dump(economy_data, f, indent=4)
+
+def get_player(gamertag):
+    """Retorna dados de um jogador específico"""
+    players = get_all_players()
+    return players.get(gamertag, {})
+
+def save_player(gamertag, data):
+    """Salva dados de um jogador"""
+    import json
+    players = get_all_players()
+    players[gamertag] = data
+    with open("players_db.json", 'w', encoding='utf-8') as f:
+        json.dump(players, f, indent=4)
+
+def get_link_by_gamertag(gamertag):
+    """Retorna ID do Discord vinculado a gamertag"""
+    import json
+    if not os.path.exists("links.json"):
+        return None
+    try:
+        with open("links.json", 'r', encoding='utf-8') as f:
+            links = json.load(f)
+            # links.json structure: {discord_id: gamertag}
+            # We need reverse lookup
+            for discord_id, tag in links.items():
+                if tag.lower() == gamertag.lower():
+                    return discord_id
+    except:
+        pass
+    return None
+
+def get_clan(tag):
+    """Retorna dados de um clã específico"""
+    clans = get_all_clans()
+    return clans.get(tag.upper())
+
