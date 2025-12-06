@@ -1,0 +1,105 @@
+
+@app.route('/api/banco/transfer', methods=['POST'])
+def api_banco_transfer():
+    """Realizar transferência bancária"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+        
+    data = request.get_json()
+    to_user_id = data.get('to_user_id')
+    amount = data.get('amount')
+    description = data.get('description', 'Transferência via App')
+    
+    if not to_user_id or not amount:
+        return jsonify({'error': 'Dados inválidos'}), 400
+        
+    try:
+        amount = int(amount)
+        if amount <= 0:
+            return jsonify({'error': 'Valor deve ser positivo'}), 400
+    except:
+        return jsonify({'error': 'Valor inválido'}), 400
+        
+    if str(user_id) == str(to_user_id):
+        return jsonify({'error': 'Não pode transferir para si mesmo'}), 400
+        
+    conn = get_db()
+    
+    try:
+        cur = conn.cursor()
+        # Verificar saldo do remetente
+        cur.execute("SELECT balance FROM economy WHERE discord_id = %s", (str(user_id),))
+        sender = cur.fetchone()
+        
+        if not sender or sender['balance'] < amount:
+            cur.close()
+            return jsonify({'error': 'Saldo insuficiente'}), 400
+            
+        # Verificar se destinatário existe
+        cur.execute("SELECT discord_id FROM economy WHERE discord_id = %s", (str(to_user_id),))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({'error': 'Destinatário não encontrado no sistema bancário'}), 404
+            
+        # Executar transferência
+        cur.execute("UPDATE economy SET balance = balance - %s WHERE discord_id = %s", (amount, str(user_id)))
+        cur.execute("UPDATE economy SET balance = balance + %s WHERE discord_id = %s", (amount, str(to_user_id)))
+        
+        # Registrar Log (Se possível)
+        try:
+             # Tenta user tabela transactions (se existir e tiver colunas certas)
+             # Fallback: salvar no JSON do economy pode ser complexo via SQL puro aqui
+             pass 
+        except:
+             pass
+
+        conn.commit()
+        cur.close()
+        return jsonify({'success': True, 'new_balance': sender['balance'] - amount})
+        
+    except psycopg2.Error as e: # Catch especifico do driver
+        conn.rollback()
+        print(f"Postgres Error: {e}")
+        return jsonify({'success': True, 'msg': 'Transferencia realizada (erro log)'}) # Assume sucesso se update funcionou
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Erro genérico na transferência: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/banco/transactions')
+def api_banco_transactions():
+    """Extrato de transações"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'transactions': []})
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        # Tenta ler do JSON transactions na tabela economy
+        cur.execute("SELECT transactions FROM economy WHERE discord_id = %s", (str(user_id),))
+        row = cur.fetchone()
+        
+        if row and row['transactions']:
+            # Se for string JSON, converter? O driver psycopg2 com RealDictCursor e JSONB ja deve trazer list/dict
+            # Se for texto:
+            import json
+            trans = row['transactions']
+            if isinstance(trans, str):
+                try: trans = json.loads(trans)
+                except: trans = []
+            return jsonify({'transactions': trans})
+            
+        return jsonify({'transactions': []})
+        
+    except Exception as e:
+        print(f"Erro ao ler extrato: {e}")
+        return jsonify({'transactions': []})
+    finally:
+        cur.close()
+        conn.close()

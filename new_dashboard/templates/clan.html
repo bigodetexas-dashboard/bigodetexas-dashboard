@@ -78,6 +78,90 @@
     </footer>
 
     <script>
+        // Carregar dados ao iniciar
+        document.addEventListener('DOMContentLoaded', loadClanInfo);
+
+        async function loadClanInfo() {
+            try {
+                const response = await fetch('/api/clan/my');
+                const data = await response.json();
+
+                if (data.has_clan) {
+                    // Esconder criação e mostrar info
+                    document.getElementById('create-clan-section').style.display = 'none';
+                    document.getElementById('clan-info').style.display = 'block';
+
+                    // Preencher dados
+                    const info = data.info;
+                    const members = data.members;
+
+                    // Cabeçalho do Clã com Cores
+                    const header = document.getElementById('clan-name-display');
+                    header.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                            <div style="
+                                width: 50px; 
+                                height: 50px; 
+                                background: linear-gradient(135deg, ${info.symbol_color1}, ${info.symbol_color2});
+                                border-radius: 50%;
+                                box-shadow: 0 0 15px ${info.symbol_color1}80;
+                            "></div>
+                            <span>${info.name}</span>
+                        </div>
+                    `;
+
+                    // Lista de Membros
+                    const membersList = document.getElementById('clan-members-list');
+                    let membersHTML = `
+                        <h3 style="margin-top: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
+                            Membros (${members.length})
+                        </h3>
+                        <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                    `;
+
+                    members.forEach(member => {
+                        // Converter data (YYYY-MM-DDTHH:mm:ss...)
+                        const joinedDate = new Date(member.joined_at).toLocaleDateString('pt-BR');
+                        const isLeader = member.role === 'leader';
+
+                        membersHTML += `
+                            <div style="
+                                background: rgba(255,255,255,0.03); 
+                                padding: 1rem; 
+                                border-radius: 0.5rem;
+                                display: flex;
+                                align-items: center;
+                                justify-content: space-between;
+                                border-left: 3px solid ${isLeader ? 'gold' : 'transparent'};
+                            ">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="ri-user-${isLeader ? 'star' : 'line'}"></i>
+                                    <div>
+                                        <strong>${member.discord_id}</strong> <!-- TODO: Trocar por nome real -->
+                                        <div style="font-size: 0.8rem; color: var(--text-secondary);">${member.role.toUpperCase()}</div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                                    Desde: ${joinedDate}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    membersHTML += '</div>';
+                    membersList.innerHTML = membersHTML;
+
+                } else {
+                    // Mostrar criação
+                    document.getElementById('create-clan-section').style.display = 'block';
+                    document.getElementById('clan-info').style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar clã:', error);
+            }
+        }
+
         async function createClan() {
             const name = document.getElementById('clan-name').value;
             const color1 = document.getElementById('clan-color1').value;
@@ -99,7 +183,7 @@
 
                 if (response.ok) {
                     alert('Clã criado com sucesso!');
-                    location.reload();
+                    loadClanInfo(); // Recarregar para mostrar o painel
                 } else {
                     alert(data.error || 'Erro ao criar clã');
                 }

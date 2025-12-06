@@ -245,8 +245,41 @@
             }
         }
 
+        // Carregar extrato
+        async function loadExtrato() {
+            try {
+                const container = document.getElementById('extrato-container');
+                const response = await fetch('/api/banco/transactions');
+                const data = await response.json();
+
+                if (!data.transactions || data.transactions.length === 0) {
+                    container.innerHTML = '<div class="extrato-line">Nenhuma transação recente.</div>';
+                    return;
+                }
+
+                let html = '';
+                data.transactions.forEach(t => {
+                    const date = new Date(t.timestamp || t.date).toLocaleDateString('pt-BR');
+                    const color = t.direction === 'in' || t.amount > 0 ? '#00ff00' : '#ff0000'; // Se amount positivo assume entrada
+                    const symbol = t.direction === 'in' || t.amount > 0 ? '+' : '-';
+
+                    html += `
+                        <div class="extrato-line" style="display: flex; justify-content: space-between;">
+                            <span>${date} - ${t.description || t.type}</span>
+                            <span style="color: ${color}">${symbol}$${Math.abs(t.amount)}</span>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Erro ao carregar extrato:', error);
+                document.getElementById('extrato-container').innerHTML = '<div class="extrato-line" style="color: red;">Erro ao carregar dados.</div>';
+            }
+        }
+
         // Inicializar
         loadBalance();
+        loadExtrato();
     </script>
 </body>
 

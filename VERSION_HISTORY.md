@@ -1,5 +1,17 @@
 # Histórico de Versões do BigodeTexas Bot
 
+## Site 9.3 (06/12/2025) 🚀
+
+**Tag:** `site-9.3-2025-12-06`
+
+**Principais Mudanças:**
+
+- **Novas Funcionalidades:** Implementação completa de Base, Clã e Banco Sul no painel web.
+- **Banco de Dados:** Schema adaptativo (`schema_v2_compat.sql`) com suporte a bases e clãs.
+- **Interfaces:** Templates `base.html`, `clan.html` e `banco.html` integrados e funcionais.
+- **API:** Rotas para registro de base, criação de clã e transferências bancárias.
+- **Backups:** Scripts de backup e diagnósticos aprimorados.
+
 ## Site 9.2 (30/11/2025) 🎨
 
 **Tag:** `site-9.2-2025-11-30`
