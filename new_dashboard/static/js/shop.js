@@ -50,9 +50,18 @@ async function loadUserBalance() {
         const data = await response.json();
         userBalance = data.balance || 0;
         document.getElementById('user-balance').textContent = formatNumber(userBalance);
+        // Atualiza também o flutuante se existir
+        const floatBalance = document.getElementById('user-balance-float');
+        if (floatBalance) {
+            floatBalance.textContent = formatNumber(userBalance);
+        }
     } catch (error) {
         console.error('Erro ao carregar saldo:', error);
         document.getElementById('user-balance').textContent = '0';
+        const floatBalance = document.getElementById('user-balance-float');
+        if (floatBalance) {
+            floatBalance.textContent = '0';
+        }
     }
 }
 

@@ -11,6 +11,7 @@
 - **Interfaces:** Templates `base.html`, `clan.html` e `banco.html` integrados e funcionais.
 - **API:** Rotas para registro de base, criação de clã e transferências bancárias.
 - **Backups:** Scripts de backup e diagnósticos aprimorados.
+- **⚠️ WIP:** Interface da Loja com elementos flutuantes (Em ajuste: layout instável reportado).
 
 ## Site 9.2 (30/11/2025) 🎨
 

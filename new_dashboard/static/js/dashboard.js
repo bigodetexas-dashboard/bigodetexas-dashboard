@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', function () {
     loadPurchaseHistory();
     loadAchievements();
     setupLogout();
+    setupTabs();
+    loadUserSettings();
 });
 
 async function loadUserProfile() {
@@ -14,13 +16,18 @@ async function loadUserProfile() {
         const response = await fetch('/api/user/profile');
         const data = await response.json();
 
-        document.getElementById('user-name').textContent = data.username || 'Usuário';
-        document.getElementById('user-gamertag').textContent = data.gamertag ? `Xbox: ${data.gamertag}` : 'Xbox: Não vinculado';
-        document.getElementById('user-balance').textContent = formatNumber(data.balance || 0);
+        const userName = document.getElementById('user-name');
+        const userGamertag = document.getElementById('user-gamertag');
+        const userBalance = document.getElementById('user-balance');
+        const userAvatar = document.getElementById('user-avatar');
+
+        if (userName) userName.textContent = data.username || 'Usuário';
+        if (userGamertag) userGamertag.textContent = data.gamertag ? `Xbox: ${data.gamertag}` : 'Xbox: Não vinculado';
+        if (userBalance) userBalance.textContent = formatNumber(data.balance || 0);
 
         // Avatar
-        if (data.avatar) {
-            document.getElementById('user-avatar').style.backgroundImage = `url(${data.avatar})`;
+        if (data.avatar && userAvatar) {
+            userAvatar.style.backgroundImage = `url(${data.avatar})`;
         }
     } catch (error) {
         console.error('Erro ao carregar perfil:', error);
@@ -33,26 +40,26 @@ async function loadUserStats() {
         const data = await response.json();
 
         // Combate
-        document.getElementById('stat-kills').textContent = data.kills || 0;
-        document.getElementById('stat-deaths').textContent = data.deaths || 0;
-        document.getElementById('stat-kd').textContent = calculateKD(data.kills, data.deaths);
-        document.getElementById('stat-zombies').textContent = data.zombie_kills || 0;
+        const statKills = document.getElementById('stat-kills');
+        const statDeaths = document.getElementById('stat-deaths');
+        const statKD = document.getElementById('stat-kd');
+        const statZombies = document.getElementById('stat-zombies');
+
+        if (statKills) statKills.textContent = data.kills || 0;
+        if (statDeaths) statDeaths.textContent = data.deaths || 0;
+        if (statKD) statKD.textContent = calculateKD(data.kills, data.deaths);
+        if (statZombies) statZombies.textContent = data.zombie_kills || 0;
 
         // Sobrevivência
-        document.getElementById('stat-lifetime').textContent = formatTime(data.lifetime || 0);
-        document.getElementById('stat-distance').textContent = formatDistance(data.distance_walked || 0);
-        document.getElementById('stat-vehicle').textContent = formatDistance(data.vehicle_distance || 0);
-        document.getElementById('stat-reconnects').textContent = data.reconnects || 0;
+        const statPlaytime = document.getElementById('stat-playtime');
+        const statDistance = document.getElementById('stat-distance');
+        const statDriving = document.getElementById('stat-driving');
+        const statBuilt = document.getElementById('stat-built');
 
-        // Construção
-        document.getElementById('stat-buildings').textContent = data.buildings_built || 0;
-        document.getElementById('stat-locks').textContent = data.locks_picked || 0;
-        document.getElementById('stat-base').textContent = data.has_base ? 'Sim' : 'Não';
-
-        // Preferências
-        document.getElementById('stat-weapon').textContent = data.favorite_weapon || '-';
-        document.getElementById('stat-city').textContent = data.favorite_city || '-';
-        document.getElementById('stat-playtime').textContent = formatTime(data.total_playtime || 0);
+        if (statPlaytime) statPlaytime.textContent = formatTime(data.total_playtime || 0);
+        if (statDistance) statDistance.textContent = formatDistance(data.distance_walked || 0);
+        if (statDriving) statDriving.textContent = formatDistance(data.vehicle_distance || 0);
+        if (statBuilt) statBuilt.textContent = data.buildings_built || 0;
     } catch (error) {
         console.error('Erro ao carregar estatísticas:', error);
     }
@@ -63,7 +70,12 @@ async function loadPurchaseHistory() {
         const response = await fetch('/api/user/purchases');
         const data = await response.json();
 
-        const container = document.getElementById('purchases-list');
+        const container = document.getElementById('purchase-history');
+
+        if (!container) {
+            console.warn('Elemento purchase-history não encontrado');
+            return;
+        }
 
         if (!data || data.length === 0) {
             container.innerHTML = `
@@ -96,7 +108,12 @@ async function loadAchievements() {
         const response = await fetch('/api/user/achievements');
         const data = await response.json();
 
-        const container = document.getElementById('achievements-grid');
+        const container = document.getElementById('achievements-list');
+
+        if (!container) {
+            console.warn('Elemento achievements-list não encontrado');
+            return;
+        }
 
         const achievements = [
             { id: 'first_kill', icon: '🎯', name: 'Primeira Morte', desc: 'Mate seu primeiro jogador', unlocked: data.first_kill },
@@ -153,3 +170,142 @@ function formatDate(dateString) {
 function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
+
+// ==================== TABS SYSTEM ====================
+function setupTabs() {
+    console.log('🔧 Configurando sistema de tabs...');
+
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    console.log(`📊 Encontrados ${tabBtns.length} botões de tabs`);
+    console.log(`📊 Encontrados ${tabContents.length} conteúdos de tabs`);
+
+    if (tabBtns.length === 0) {
+        console.error('❌ Nenhum botão de tab encontrado!');
+        return;
+    }
+
+    tabBtns.forEach((btn, index) => {
+        console.log(`✅ Registrando evento para tab ${index}: ${btn.getAttribute('data-tab')}`);
+
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            console.log(`🖱️ Tab clicada: ${this.getAttribute('data-tab')}`);
+
+            // Remove active class from all buttons and contents
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            // Add active class to clicked button
+            this.classList.add('active');
+
+            // Show corresponding tab content
+            const tabId = this.getAttribute('data-tab');
+            const tabContent = document.getElementById(`tab-${tabId}`);
+
+            if (tabContent) {
+                tabContent.classList.add('active');
+                console.log(`✅ Tab ativada: ${tabId}`);
+            } else {
+                console.error(`❌ Conteúdo da tab não encontrado: tab-${tabId}`);
+            }
+        });
+    });
+
+    console.log('✅ Sistema de tabs configurado com sucesso!');
+}
+
+// ==================== GAMERTAG SYSTEM ====================
+async function saveGamertag() {
+    const gamertagInput = document.getElementById('gamertag-input');
+    const statusDiv = document.getElementById('gamertag-status');
+    const gamertag = gamertagInput.value.trim();
+
+    if (!gamertag) {
+        statusDiv.innerHTML = '<p class="text-danger">⚠️ Por favor, digite um Gamertag válido.</p>';
+        return;
+    }
+
+    statusDiv.innerHTML = '<p class="text-muted">⏳ Salvando...</p>';
+
+    try {
+        const response = await fetch('/api/user/update-gamertag', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ gamertag: gamertag })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            statusDiv.innerHTML = '<p class="text-success">✅ Gamertag salvo com sucesso!</p>';
+            // Update display
+            document.getElementById('user-gamertag').textContent = `Xbox: ${gamertag}`;
+
+            // Clear status after 3 seconds
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 3000);
+        } else {
+            statusDiv.innerHTML = `<p class="text-danger">❌ Erro: ${data.error || 'Falha ao salvar'}</p>`;
+        }
+    } catch (error) {
+        console.error('Erro ao salvar gamertag:', error);
+        statusDiv.innerHTML = '<p class="text-danger">❌ Erro ao conectar com o servidor.</p>';
+    }
+}
+
+// ==================== USER SETTINGS ====================
+async function loadUserSettings() {
+    try {
+        const response = await fetch('/api/user/profile');
+        const data = await response.json();
+
+        // Load gamertag if exists
+        if (data.gamertag) {
+            const gamertagInput = document.getElementById('gamertag-input');
+            if (gamertagInput) {
+                gamertagInput.value = data.gamertag;
+            }
+        }
+
+        // Load notification preferences from localStorage
+        const notifyPurchases = localStorage.getItem('notify-purchases') !== 'false';
+        const notifyKills = localStorage.getItem('notify-kills') !== 'false';
+        const notifyClan = localStorage.getItem('notify-clan') === 'true';
+
+        const notifyPurchasesEl = document.getElementById('notify-purchases');
+        const notifyKillsEl = document.getElementById('notify-kills');
+        const notifyClanEl = document.getElementById('notify-clan');
+
+        if (notifyPurchasesEl) notifyPurchasesEl.checked = notifyPurchases;
+        if (notifyKillsEl) notifyKillsEl.checked = notifyKills;
+        if (notifyClanEl) notifyClanEl.checked = notifyClan;
+
+        // Setup listeners for notification toggles
+        setupNotificationToggles();
+    } catch (error) {
+        console.error('Erro ao carregar configurações:', error);
+    }
+}
+
+function setupNotificationToggles() {
+    const toggles = ['notify-purchases', 'notify-kills', 'notify-clan'];
+
+    toggles.forEach(toggleId => {
+        const toggle = document.getElementById(toggleId);
+        if (toggle) {
+            toggle.addEventListener('change', (e) => {
+                localStorage.setItem(toggleId, e.target.checked);
+                console.log(`${toggleId} atualizado:`, e.target.checked);
+            });
+        }
+    });
+}
+
+// Make saveGamertag available globally
+window.saveGamertag = saveGamertag;
+

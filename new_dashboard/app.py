@@ -126,6 +126,34 @@ def banco():
     """P√°gina do Banco Sul"""
     return render_template('banco.html')
 
+@app.route('/achievements')
+def achievements():
+    """P√°gina de conquistas"""
+    # Criar sess√£o fake para testes se n√£o estiver logado
+    if 'discord_user_id' not in session:
+        session['discord_user_id'] = 'test_user_123'
+        session['discord_username'] = 'Jogador de Teste'
+    return render_template('achievements.html')
+
+@app.route('/history')
+def history():
+    """P√°gina de hist√≥rico de atividades"""
+    # Criar sess√£o fake para testes se n√£o estiver logado
+    if 'discord_user_id' not in session:
+        session['discord_user_id'] = 'test_user_123'
+        session['discord_username'] = 'Jogador de Teste'
+    return render_template('history.html')
+
+@app.route('/settings')
+def settings():
+    """P√°gina de configura√ß√µes"""
+    # Criar sess√£o fake para testes se n√£o estiver logado
+    if 'discord_user_id' not in session:
+        session['discord_user_id'] = 'test_user_123'
+        session['discord_username'] = 'Jogador de Teste'
+    return render_template('settings.html')
+
+
 
 # ==================== API ENDPOINTS ====================
 
@@ -351,6 +379,57 @@ def api_user_achievements():
         'hunter': achievements.get('hunter', False),
         'explorer': achievements.get('explorer', False)
     })
+
+@app.route('/api/user/update-gamertag', methods=['POST'])
+def api_user_update_gamertag():
+    """Atualizar gamertag do usu√°rio"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    gamertag = data.get('gamertag', '').strip()
+    
+    if not gamertag:
+        return jsonify({'error': 'Gamertag inv√°lido'}), 400
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        # Verificar se j√° existe link
+        cur.execute("SELECT id FROM links WHERE discord_id = %s", (str(user_id),))
+        existing = cur.fetchone()
+        
+        if existing:
+            # Atualizar
+            cur.execute("""
+                UPDATE links 
+                SET gamertag = %s, updated_at = NOW()
+                WHERE discord_id = %s
+            """, (gamertag, str(user_id)))
+        else:
+            # Inserir novo
+            cur.execute("""
+                INSERT INTO links (discord_id, gamertag)
+                VALUES (%s, %s)
+            """, (str(user_id), gamertag))
+        
+        conn.commit()
+        
+        return jsonify({
+            'success': True,
+            'gamertag': gamertag
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Erro ao atualizar gamertag: {e}")
+        return jsonify({'error': 'Erro ao salvar gamertag'}), 500
+    finally:
+        cur.close()
+        conn.close()
+
 
 @app.route('/api/leaderboard')
 def api_leaderboard():
@@ -721,8 +800,6 @@ def api_heatmap_weapons():
             'weapons': []
         }), 500
 
-@app.route('/api/base/register', methods=['POST'])
-def api_base_register():
     """Registrar base do usu√°rio"""
     user_id = session.get('discord_user_id')
     if not user_id:
@@ -900,6 +977,7 @@ def api_base_check():
         })
     else:
         return jsonify({'has_base': False})
+@app.route('/api/heatmap/timeline')
 def api_heatmap_timeline():
     """
     API de Timeline - Retorna mortes agrupadas por per√≠odo de tempo
@@ -1072,46 +1150,6 @@ def api_base_register():
         print(f"Erro ao registrar base: {e}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/clan/create', methods=['POST'])
-def api_clan_create():
-    """Criar novo cl√£"""
-    try:
-        data = request.get_json()
-        user_id = session.get('discord_user_id', 'test_user_123')
-        
-        conn = get_db()
-        cur = conn.cursor()
-        
-        # Verificar se usu√°rio j√° est√° em um cl√£
-        cur.execute("SELECT clan_id FROM clan_members WHERE user_id = %s", (user_id,))
-        if cur.fetchone():
-            conn.close()
-            return jsonify({'error': 'Voc√™ j√° est√° em um cl√£'}), 400
-        
-        # Criar cl√£
-        cur.execute("""
-            INSERT INTO clans (name, leader_id, symbol_color1, symbol_color2, symbol_icon)
-            VALUES (%s, %s, %s, %s, %s)
-            RETURNING id
-        """, (data['name'], user_id, data.get('color1', '#FF0000'), 
-              data.get('color2', '#00FF00'), data.get('icon', 'shield')))
-        
-        clan_id = cur.fetchone()[0]
-        
-        # Adicionar l√≠der como membro
-        cur.execute("""
-            INSERT INTO clan_members (clan_id, user_id, role)
-            VALUES (%s, %s, 'leader')
-        """, (clan_id, user_id))
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify({'success': True, 'clan_id': clan_id})
-    except Exception as e:
-        print(f"Erro ao criar cl√£: {e}")
-        return jsonify({'error': str(e)}), 500
-
 @app.route('/api/banco/transfer', methods=['POST'])
 def api_banco_transfer():
     """Transferir dinheiro entre jogadores"""
@@ -1161,109 +1199,38 @@ def logout():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
- 
- @ a p p . r o u t e ( ' / a p i / b a n c o / t r a n s f e r ' ,   m e t h o d s = [ ' P O S T ' ] )  
- d e f   a p i _ b a n c o _ t r a n s f e r ( ) :  
-         " " " R e a l i z a r   t r a n s f e r √ ™ n c i a   b a n c √ ° r i a " " "  
-         u s e r _ i d   =   s e s s i o n . g e t ( ' d i s c o r d _ u s e r _ i d ' )  
-         i f   n o t   u s e r _ i d :  
-                 r e t u r n   j s o n i f y ( { ' e r r o r ' :   ' N o t   a u t h e n t i c a t e d ' } ) ,   4 0 1  
-                  
-         d a t a   =   r e q u e s t . g e t _ j s o n ( )  
-         t o _ u s e r _ i d   =   d a t a . g e t ( ' t o _ u s e r _ i d ' )  
-         a m o u n t   =   d a t a . g e t ( ' a m o u n t ' )  
-         d e s c r i p t i o n   =   d a t a . g e t ( ' d e s c r i p t i o n ' ,   ' T r a n s f e r √ ™ n c i a   v i a   A p p ' )  
-          
-         i f   n o t   t o _ u s e r _ i d   o r   n o t   a m o u n t :  
-                 r e t u r n   j s o n i f y ( { ' e r r o r ' :   ' D a d o s   i n v √ ° l i d o s ' } ) ,   4 0 0  
-                  
-         t r y :  
-                 a m o u n t   =   i n t ( a m o u n t )  
-                 i f   a m o u n t   < =   0 :  
-                         r e t u r n   j s o n i f y ( { ' e r r o r ' :   ' V a l o r   d e v e   s e r   p o s i t i v o ' } ) ,   4 0 0  
-         e x c e p t :  
-                 r e t u r n   j s o n i f y ( { ' e r r o r ' :   ' V a l o r   i n v √ ° l i d o ' } ) ,   4 0 0  
-                  
-         i f   s t r ( u s e r _ i d )   = =   s t r ( t o _ u s e r _ i d ) :  
-                 r e t u r n   j s o n i f y ( { ' e r r o r ' :   ' N √ £ o   p o d e   t r a n s f e r i r   p a r a   s i   m e s m o ' } ) ,   4 0 0  
-                  
-         c o n n   =   g e t _ d b ( )  
-          
-         t r y :  
-                 c u r   =   c o n n . c u r s o r ( )  
-                 #   V e r i f i c a r   s a l d o   d o   r e m e t e n t e  
-                 c u r . e x e c u t e ( " S E L E C T   b a l a n c e   F R O M   e c o n o m y   W H E R E   d i s c o r d _ i d   =   % s " ,   ( s t r ( u s e r _ i d ) , ) )  
-                 s e n d e r   =   c u r . f e t c h o n e ( )  
-                  
-                 i f   n o t   s e n d e r   o r   s e n d e r [ ' b a l a n c e ' ]   <   a m o u n t :  
-                         c u r . c l o s e ( )  
-                         r e t u r n   j s o n i f y ( { ' e r r o r ' :   ' S a l d o   i n s u f i c i e n t e ' } ) ,   4 0 0  
-                          
-                 #   V e r i f i c a r   s e   d e s t i n a t √ ° r i o   e x i s t e  
-                 c u r . e x e c u t e ( " S E L E C T   d i s c o r d _ i d   F R O M   e c o n o m y   W H E R E   d i s c o r d _ i d   =   % s " ,   ( s t r ( t o _ u s e r _ i d ) , ) )  
-                 i f   n o t   c u r . f e t c h o n e ( ) :  
-                         c u r . c l o s e ( )  
-                         r e t u r n   j s o n i f y ( { ' e r r o r ' :   ' D e s t i n a t √ ° r i o   n √ £ o   e n c o n t r a d o   n o   s i s t e m a   b a n c √ ° r i o ' } ) ,   4 0 4  
-                          
-                 #   E x e c u t a r   t r a n s f e r √ ™ n c i a  
-                 c u r . e x e c u t e ( " U P D A T E   e c o n o m y   S E T   b a l a n c e   =   b a l a n c e   -   % s   W H E R E   d i s c o r d _ i d   =   % s " ,   ( a m o u n t ,   s t r ( u s e r _ i d ) ) )  
-                 c u r . e x e c u t e ( " U P D A T E   e c o n o m y   S E T   b a l a n c e   =   b a l a n c e   +   % s   W H E R E   d i s c o r d _ i d   =   % s " ,   ( a m o u n t ,   s t r ( t o _ u s e r _ i d ) ) )  
-                  
-                 #   R e g i s t r a r   L o g   ( S e   p o s s √ ≠ v e l )  
-                 t r y :  
-                           #   T e n t a   u s e r   t a b e l a   t r a n s a c t i o n s   ( s e   e x i s t i r   e   t i v e r   c o l u n a s   c e r t a s )  
-                           #   F a l l b a c k :   s a l v a r   n o   J S O N   d o   e c o n o m y   p o d e   s e r   c o m p l e x o   v i a   S Q L   p u r o   a q u i  
-                           p a s s    
-                 e x c e p t :  
-                           p a s s  
-  
-                 c o n n . c o m m i t ( )  
-                 c u r . c l o s e ( )  
-                 r e t u r n   j s o n i f y ( { ' s u c c e s s ' :   T r u e ,   ' n e w _ b a l a n c e ' :   s e n d e r [ ' b a l a n c e ' ]   -   a m o u n t } )  
-                  
-         e x c e p t   p s y c o p g 2 . E r r o r   a s   e :   #   C a t c h   e s p e c i f i c o   d o   d r i v e r  
-                 c o n n . r o l l b a c k ( )  
-                 p r i n t ( f " P o s t g r e s   E r r o r :   { e } " )  
-                 r e t u r n   j s o n i f y ( { ' s u c c e s s ' :   T r u e ,   ' m s g ' :   ' T r a n s f e r e n c i a   r e a l i z a d a   ( e r r o   l o g ) ' } )   #   A s s u m e   s u c e s s o   s e   u p d a t e   f u n c i o n o u  
-                  
-         e x c e p t   E x c e p t i o n   a s   e :  
-                 c o n n . r o l l b a c k ( )  
-                 p r i n t ( f " E r r o   g e n √ © r i c o   n a   t r a n s f e r √ ™ n c i a :   { e } " )  
-                 r e t u r n   j s o n i f y ( { ' e r r o r ' :   s t r ( e ) } ) ,   5 0 0  
-         f i n a l l y :  
-                 c o n n . c l o s e ( )  
-  
- @ a p p . r o u t e ( ' / a p i / b a n c o / t r a n s a c t i o n s ' )  
- d e f   a p i _ b a n c o _ t r a n s a c t i o n s ( ) :  
-         " " " E x t r a t o   d e   t r a n s a √ ß √ µ e s " " "  
-         u s e r _ i d   =   s e s s i o n . g e t ( ' d i s c o r d _ u s e r _ i d ' )  
-         i f   n o t   u s e r _ i d :  
-                 r e t u r n   j s o n i f y ( { ' t r a n s a c t i o n s ' :   [ ] } )  
-          
-         c o n n   =   g e t _ d b ( )  
-         c u r   =   c o n n . c u r s o r ( )  
-          
-         t r y :  
-                 #   T e n t a   l e r   d o   J S O N   t r a n s a c t i o n s   n a   t a b e l a   e c o n o m y  
-                 c u r . e x e c u t e ( " S E L E C T   t r a n s a c t i o n s   F R O M   e c o n o m y   W H E R E   d i s c o r d _ i d   =   % s " ,   ( s t r ( u s e r _ i d ) , ) )  
-                 r o w   =   c u r . f e t c h o n e ( )  
-                  
-                 i f   r o w   a n d   r o w [ ' t r a n s a c t i o n s ' ] :  
-                         #   S e   f o r   s t r i n g   J S O N ,   c o n v e r t e r ?   O   d r i v e r   p s y c o p g 2   c o m   R e a l D i c t C u r s o r   e   J S O N B   j a   d e v e   t r a z e r   l i s t / d i c t  
-                         #   S e   f o r   t e x t o :  
-                         i m p o r t   j s o n  
-                         t r a n s   =   r o w [ ' t r a n s a c t i o n s ' ]  
-                         i f   i s i n s t a n c e ( t r a n s ,   s t r ) :  
-                                 t r y :   t r a n s   =   j s o n . l o a d s ( t r a n s )  
-                                 e x c e p t :   t r a n s   =   [ ]  
-                         r e t u r n   j s o n i f y ( { ' t r a n s a c t i o n s ' :   t r a n s } )  
-                          
-                 r e t u r n   j s o n i f y ( { ' t r a n s a c t i o n s ' :   [ ] } )  
-                  
-         e x c e p t   E x c e p t i o n   a s   e :  
-                 p r i n t ( f " E r r o   a o   l e r   e x t r a t o :   { e } " )  
-                 r e t u r n   j s o n i f y ( { ' t r a n s a c t i o n s ' :   [ ] } )  
-         f i n a l l y :  
-                 c u r . c l o s e ( )  
-                 c o n n . c l o s e ( )  
- 
+
+@app.route('/api/banco/transactions')
+def api_banco_transactions():
+    """Extrato de transa√ß√µes"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'transactions': []})
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        # Tenta ler do JSON transactions na tabela economy
+        cur.execute("SELECT transactions FROM economy WHERE discord_id = %s", (str(user_id),))
+        row = cur.fetchone()
+        
+        if row and row['transactions']:
+            # Se for string JSON, converter? O driver psycopg2 com RealDictCursor e JSONB ja deve trazer list/dict
+            # Se for texto:
+            import json
+            trans = row['transactions']
+            if isinstance(trans, str):
+                try: trans = json.loads(trans)
+                except: trans = []
+            return jsonify({'transactions': trans})
+            
+        return jsonify({'transactions': []})
+        
+    except Exception as e:
+        print(f"Erro ao ler extrato: {e}")
+        return jsonify({'transactions': []})
+    finally:
+        cur.close()
+        conn.close()
+

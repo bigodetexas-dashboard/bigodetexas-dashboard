@@ -56,8 +56,24 @@
             </div>
         </div>
 
-        <div class="dashboard-grid">
-            <!-- Estatísticas Principais -->
+        <!-- Tabs de Navegação -->
+        <div class="profile-tabs">
+            <button class="tab-btn active" data-tab="stats">
+                <i class="ri-bar-chart-2-line"></i> Estatísticas
+            </button>
+            <button class="tab-btn" data-tab="achievements">
+                <i class="ri-medal-line"></i> Conquistas
+            </button>
+            <button class="tab-btn" data-tab="history">
+                <i class="ri-history-line"></i> Histórico
+            </button>
+            <button class="tab-btn" data-tab="settings">
+                <i class="ri-settings-3-line"></i> Configurações
+            </button>
+        </div>
+
+        <!-- Tab: Estatísticas -->
+        <div class="tab-content active" id="tab-stats">
             <div class="stats-section">
                 <h2><i class="ri-bar-chart-2-line"></i> Estatísticas de Combate</h2>
                 <div class="stats-grid">
@@ -123,24 +139,60 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Sidebar (Histórico e Conquistas) -->
-            <div class="sidebar-section">
-                <!-- Conquistas -->
-                <div class="achievements-card">
-                    <h3><i class="ri-medal-line"></i> Conquistas</h3>
-                    <div class="achievements-list" id="achievements-list">
-                        <!-- Preenchido via JS -->
+        <!-- Tab: Conquistas -->
+        <div class="tab-content" id="tab-achievements">
+            <div class="achievements-card">
+                <h2><i class="ri-medal-line"></i> Suas Conquistas</h2>
+                <div class="achievements-list" id="achievements-list">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Histórico -->
+        <div class="tab-content" id="tab-history">
+            <div class="history-card">
+                <h2><i class="ri-history-line"></i> Histórico de Compras</h2>
+                <div class="purchase-history" id="purchase-history">
+                    <!-- Preenchido via JS -->
+                    <p class="text-muted text-center">Nenhuma compra recente.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Configurações -->
+        <div class="tab-content" id="tab-settings">
+            <div class="settings-card">
+                <h2><i class="ri-settings-3-line"></i> Configurações do Perfil</h2>
+                <div class="settings-section">
+                    <h3><i class="ri-gamepad-line"></i> Vinculação de Gamertag</h3>
+                    <p class="text-muted">Vincule sua conta Xbox para sincronizar estatísticas do servidor Nitrado.</p>
+                    <div class="gamertag-form">
+                        <input type="text" id="gamertag-input" class="form-input" placeholder="Digite seu Gamertag Xbox"
+                            value="">
+                        <button class="btn btn-primary" onclick="saveGamertag()">
+                            <i class="ri-save-line"></i> Salvar Gamertag
+                        </button>
                     </div>
+                    <div id="gamertag-status" class="mt-2"></div>
                 </div>
 
-                <!-- Histórico de Compras -->
-                <div class="history-card mt-4">
-                    <h3><i class="ri-history-line"></i> Últimas Compras</h3>
-                    <div class="purchase-history" id="purchase-history">
-                        <!-- Preenchido via JS -->
-                        <p class="text-muted text-center">Nenhuma compra recente.</p>
-                    </div>
+                <div class="settings-section mt-4">
+                    <h3><i class="ri-notification-line"></i> Notificações</h3>
+                    <label class="setting-toggle">
+                        <input type="checkbox" id="notify-purchases" checked>
+                        <span>Notificar sobre compras</span>
+                    </label>
+                    <label class="setting-toggle">
+                        <input type="checkbox" id="notify-kills" checked>
+                        <span>Notificar sobre kills</span>
+                    </label>
+                    <label class="setting-toggle">
+                        <input type="checkbox" id="notify-clan">
+                        <span>Notificar atividades do clã</span>
+                    </label>
                 </div>
             </div>
         </div>
@@ -154,6 +206,7 @@
         </div>
     </footer>
 
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 

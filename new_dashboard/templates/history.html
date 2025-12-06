@@ -1,0 +1,694 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico - SERV. BRASIL SUL - XBOX{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+        min-height: 100vh;
+        padding: 2rem;
+    }
+
+    .history-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 0.6s ease-out;
+    }
+
+    .page-header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 1.1rem;
+    }
+
+    .filters-section {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-group label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 0.8rem;
+        color: #fff;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: #f5576c;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .filter-group select option {
+        background: #1a1f3a;
+        color: #fff;
+    }
+
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.6s ease-out 0.4s both;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-card .icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 0.3rem;
+    }
+
+    .stat-card .label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.85rem;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 3rem;
+        animation: fadeIn 0.6s ease-out 0.6s both;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 1rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+        animation: slideInLeft 0.5s ease-out;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -2.5rem;
+        top: 1.5rem;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        background: #f5576c;
+        border: 3px solid #0a0e27;
+        z-index: 1;
+    }
+
+    .timeline-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .timeline-card:hover {
+        transform: translateX(10px);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .timeline-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .timeline-type {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .timeline-type .icon {
+        font-size: 1.5rem;
+    }
+
+    .timeline-time {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85rem;
+    }
+
+    .timeline-content {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .timeline-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .detail-label {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .event-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-kill {
+        background: rgba(245, 87, 108, 0.2);
+        color: #f5576c;
+    }
+
+    .badge-death {
+        background: rgba(255, 107, 107, 0.2);
+        color: #ff6b6b;
+    }
+
+    .badge-login {
+        background: rgba(78, 205, 196, 0.2);
+        color: #4ecdc4;
+    }
+
+    .badge-logout {
+        background: rgba(255, 159, 64, 0.2);
+        color: #ff9f40;
+    }
+
+    .badge-achievement {
+        background: rgba(255, 215, 0, 0.2);
+        color: #ffd700;
+    }
+
+    .badge-trade {
+        background: rgba(102, 126, 234, 0.2);
+        color: #667eea;
+    }
+
+    .load-more {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .load-more-btn {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .load-more-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .empty-state .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        font-size: 1.2rem;
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .timeline {
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            left: 0.5rem;
+        }
+
+        .timeline-item::before {
+            left: -1.75rem;
+        }
+
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <div class="page-header">
+        <h1>📜 Histórico de Atividades</h1>
+        <p>Acompanhe todas as suas ações e eventos no servidor</p>
+    </div>
+
+    <div class="filters-section">
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label>Tipo de Evento</label>
+                <select id="eventTypeFilter">
+                    <option value="all">Todos os Eventos</option>
+                    <option value="kill">Eliminações</option>
+                    <option value="death">Mortes</option>
+                    <option value="login">Conexões</option>
+                    <option value="logout">Desconexões</option>
+                    <option value="achievement">Conquistas</option>
+                    <option value="trade">Negociações</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Período</label>
+                <select id="periodFilter">
+                    <option value="today">Hoje</option>
+                    <option value="week">Última Semana</option>
+                    <option value="month">Último Mês</option>
+                    <option value="all">Todo o Histórico</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Data Inicial</label>
+                <input type="date" id="startDate">
+            </div>
+
+            <div class="filter-group">
+                <label>Data Final</label>
+                <input type="date" id="endDate">
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="icon">📊</div>
+            <div class="value" id="totalEvents">0</div>
+            <div class="label">Total de Eventos</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="icon">⚔️</div>
+            <div class="value" id="totalKills">0</div>
+            <div class="label">Eliminações</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="icon">💀</div>
+            <div class="value" id="totalDeaths">0</div>
+            <div class="label">Mortes</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="icon">⏱️</div>
+            <div class="value" id="avgSession">0h</div>
+            <div class="label">Sessão Média</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="icon">🎯</div>
+            <div class="value" id="kdRatio">0.0</div>
+            <div class="label">K/D Ratio</div>
+        </div>
+    </div>
+
+    <div class="timeline" id="timeline">
+        <!-- Timeline items will be loaded here -->
+    </div>
+
+    <div class="load-more">
+        <button class="load-more-btn" id="loadMoreBtn">Carregar Mais</button>
+    </div>
+</div>
+
+<script>
+    // Sample history data
+    const historyData = [
+        {
+            type: 'kill',
+            icon: '⚔️',
+            title: 'Eliminação em Combate',
+            description: 'Você eliminou o jogador "SniperPro123"',
+            timestamp: new Date('2025-12-06T14:30:00'),
+            details: {
+                weapon: 'M4A1',
+                distance: '245m',
+                location: 'Elektro',
+                headshot: 'Sim'
+            }
+        },
+        {
+            type: 'achievement',
+            icon: '🏆',
+            title: 'Conquista Desbloqueada',
+            description: 'Você desbloqueou "Primeiro Sangue"',
+            timestamp: new Date('2025-12-06T13:15:00'),
+            details: {
+                points: '+10 pontos',
+                reward: '100 moedas',
+                rarity: 'Comum'
+            }
+        },
+        {
+            type: 'death',
+            icon: '💀',
+            title: 'Morte em Combate',
+            description: 'Você foi eliminado por "ClanLeader99"',
+            timestamp: new Date('2025-12-06T12:00:00'),
+            details: {
+                weapon: 'SVD',
+                location: 'NWAF',
+                survivalTime: '3h 45m'
+            }
+        },
+        {
+            type: 'login',
+            icon: '🟢',
+            title: 'Conexão ao Servidor',
+            description: 'Você entrou no servidor',
+            timestamp: new Date('2025-12-06T08:15:00'),
+            details: {
+                server: 'BRASIL SUL #1',
+                players: '45/60'
+            }
+        },
+        {
+            type: 'trade',
+            icon: '💰',
+            title: 'Negociação Realizada',
+            description: 'Você comprou "Kit Médico Avançado"',
+            timestamp: new Date('2025-12-05T19:30:00'),
+            details: {
+                price: '500 moedas',
+                seller: 'Loja do Servidor',
+                quantity: '1x'
+            }
+        },
+        {
+            type: 'kill',
+            icon: '⚔️',
+            title: 'Eliminação em Combate',
+            description: 'Você eliminou o jogador "Noob2024"',
+            timestamp: new Date('2025-12-05T18:45:00'),
+            details: {
+                weapon: 'AKM',
+                distance: '50m',
+                location: 'Berezino',
+                headshot: 'Não'
+            }
+        },
+        {
+            type: 'logout',
+            icon: '🔴',
+            title: 'Desconexão do Servidor',
+            description: 'Você saiu do servidor',
+            timestamp: new Date('2025-12-05T17:00:00'),
+            details: {
+                sessionTime: '2h 30m',
+                kills: '3',
+                deaths: '0'
+            }
+        },
+        {
+            type: 'achievement',
+            icon: '🏆',
+            title: 'Conquista Desbloqueada',
+            description: 'Você desbloqueou "Sobrevivente Experiente"',
+            timestamp: new Date('2025-12-04T20:00:00'),
+            details: {
+                points: '+25 pontos',
+                reward: '250 moedas',
+                rarity: 'Raro'
+            }
+        }
+    ];
+
+    let displayedEvents = 5;
+    let currentFilter = 'all';
+    let currentPeriod = 'all';
+
+    function formatTimeAgo(date) {
+        const now = new Date();
+        const diff = now - date;
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (minutes < 60) return `${minutes} minutos atrás`;
+        if (hours < 24) return `${hours} horas atrás`;
+        return `${days} dias atrás`;
+    }
+
+    function renderTimeline() {
+        const timeline = document.getElementById('timeline');
+        const filtered = filterEvents();
+
+        if (filtered.length === 0) {
+            timeline.innerHTML = `
+            <div class="empty-state">
+                <div class="icon">📭</div>
+                <p>Nenhum evento encontrado para os filtros selecionados</p>
+            </div>
+        `;
+            return;
+        }
+
+        const toDisplay = filtered.slice(0, displayedEvents);
+
+        timeline.innerHTML = toDisplay.map(event => `
+        <div class="timeline-item">
+            <div class="timeline-card">
+                <div class="timeline-header">
+                    <div class="timeline-type">
+                        <span class="icon">${event.icon}</span>
+                        <span>${event.title}</span>
+                    </div>
+                    <div class="timeline-time">${formatTimeAgo(event.timestamp)}</div>
+                </div>
+                <div class="timeline-content">
+                    ${event.description}
+                    <span class="event-badge badge-${event.type}">${event.type}</span>
+                </div>
+                <div class="timeline-details">
+                    ${Object.entries(event.details).map(([key, value]) => `
+                        <div class="detail-item">
+                            <div class="detail-label">${key}</div>
+                            <div class="detail-value">${value}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+        document.getElementById('loadMoreBtn').style.display =
+            displayedEvents >= filtered.length ? 'none' : 'block';
+    }
+
+    function filterEvents() {
+        return historyData.filter(event => {
+            if (currentFilter !== 'all' && event.type !== currentFilter) return false;
+
+            const eventDate = event.timestamp;
+            const now = new Date();
+
+            if (currentPeriod === 'today') {
+                return eventDate.toDateString() === now.toDateString();
+            } else if (currentPeriod === 'week') {
+                const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+                return eventDate >= weekAgo;
+            } else if (currentPeriod === 'month') {
+                const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+                return eventDate >= monthAgo;
+            }
+
+            return true;
+        });
+    }
+
+    function updateStats() {
+        const filtered = filterEvents();
+        const kills = filtered.filter(e => e.type === 'kill').length;
+        const deaths = filtered.filter(e => e.type === 'death').length;
+        const kdRatio = deaths > 0 ? (kills / deaths).toFixed(2) : kills.toFixed(2);
+
+        document.getElementById('totalEvents').textContent = filtered.length;
+        document.getElementById('totalKills').textContent = kills;
+        document.getElementById('totalDeaths').textContent = deaths;
+        document.getElementById('kdRatio').textContent = kdRatio;
+        document.getElementById('avgSession').textContent = '2.5h';
+    }
+
+    // Event listeners
+    document.getElementById('eventTypeFilter').addEventListener('change', (e) => {
+        currentFilter = e.target.value;
+        displayedEvents = 5;
+        renderTimeline();
+        updateStats();
+    });
+
+    document.getElementById('periodFilter').addEventListener('change', (e) => {
+        currentPeriod = e.target.value;
+        displayedEvents = 5;
+        renderTimeline();
+        updateStats();
+    });
+
+    document.getElementById('loadMoreBtn').addEventListener('click', () => {
+        displayedEvents += 5;
+        renderTimeline();
+    });
+
+    // Initial render
+    renderTimeline();
+    updateStats();
+</script>
+{% endblock %}

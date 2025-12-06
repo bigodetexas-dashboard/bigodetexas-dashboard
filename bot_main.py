@@ -770,10 +770,11 @@ def check_construction(x, z, y, player_name, item_name):
         return False, "UndergroundBase"
         
     # 4. PROTEÇÃO DE BASE
-    alarms = load_alarms()
-    for aid, data in alarms.items():
-        dist = math.sqrt((x - data['x'])**2 + (z - data['z'])**2)
-        if dist <= data['radius']:
+    # 4. PROTEÇÃO DE BASE
+    active_bases = database.get_active_bases()
+    for base in active_bases:
+        dist = math.sqrt((x - base['x'])**2 + (z - base['z'])**2)
+        if dist <= base['radius']:
             # --- REGRAS ESPECÍFICAS DE BASE ---
             
             # A. PNEUS (Glitch) -> BANIMENTO IMEDIATO
@@ -784,25 +785,38 @@ def check_construction(x, z, y, player_name, item_name):
             if "improvisedshelter" in item_lower:
                 return False, f"BannedItemBase:{item_name}"
                 
-            # C. FOGUEIRA (Fireplace) -> APENAS CLÃ
+            # C. FOGUEIRA/CONSTRUÇÃO -> APENAS AUTORIZADOS
             
             # Verifica se o jogador é do clã ou dono
             builder_id = get_discord_id_by_gamertag(player_name)
             
             if not builder_id:
                 # Se não tem conta vinculada, é considerado INIMIGO na área protegida
-                return False, f"UnauthorizedBase:{data['name']}"
+                return False, f"UnauthorizedBase:{base.get('name', 'Base')}"
             
-            owner_clan, _ = get_user_clan(data['owner_id'])
-            builder_clan, _ = get_user_clan(builder_id)
-            
-            # Se for o dono ou do mesmo clã, permite
-            if data['owner_id'] == builder_id:
+            # 1. É o Dono?
+            if str(base['owner_id']) == str(builder_id):
                 return True, "Owner"
-            if owner_clan and builder_clan == owner_clan:
-                return True, "ClanMember"
-                
-            return False, f"UnauthorizedBase:{data['name']}"
+
+            # 2. Tem permissão explícita? (Permissao de Construir via Tabela)
+            if base.get('source') == 'db' and database.check_base_permission(base['id'], builder_id):
+                return True, "PermittedUser"
+            
+            # 3. É do Clã da Base? (Verificação Refinada)
+            builder_clan_tag, builder_clan_data = get_user_clan(builder_id)
+            
+            # Se base V2 tem Clan ID
+            if base.get('clan_id') and builder_clan_data:
+                # Se o clã do builder tiver ID e bater com o da base
+                if builder_clan_data.get('id') == base['clan_id']:
+                    return True, "ClanBaseMember"
+
+            # Fallback Legacy: Compara TAGs se ownership bate
+            owner_clan_tag, _ = get_user_clan(base['owner_id'])
+            if owner_clan_tag and builder_clan_tag == owner_clan_tag:
+                 return True, "ClanMemberLegacy"
+
+            return False, f"UnauthorizedBase:{base.get('name', 'Base')}"
             
     return True, "OK"
 

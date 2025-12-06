@@ -1,0 +1,696 @@
+{% extends "base.html" %}
+
+{% block title %}Conquistas - SERV. BRASIL SUL - XBOX{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --achievement-bronze: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+        --achievement-silver: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+        --achievement-gold: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        --achievement-platinum: linear-gradient(135deg, #E5E4E2 0%, #B9F2FF 100%);
+        --achievement-diamond: linear-gradient(135deg, #B9F2FF 0%, #00CED1 100%);
+    }
+
+    body {
+        background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+        min-height: 100vh;
+        padding: 2rem;
+    }
+
+    .achievements-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 0.6s ease-out;
+    }
+
+    .page-header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 1.1rem;
+    }
+
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+        animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-card .icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card .value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .label {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .progress-bar-container {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        height: 10px;
+        margin-top: 1rem;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        transition: width 1s ease-out;
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        animation: fadeIn 0.6s ease-out 0.4s both;
+    }
+
+    .filter-tab {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 0.8rem 1.5rem;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .filter-tab:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+
+    .filter-tab.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border-color: transparent;
+    }
+
+    .achievements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        animation: fadeIn 0.6s ease-out 0.6s both;
+    }
+
+    .achievement-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .achievement-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: var(--achievement-bronze);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .achievement-card.unlocked::before {
+        opacity: 1;
+    }
+
+    .achievement-card.silver::before {
+        background: var(--achievement-silver);
+    }
+
+    .achievement-card.gold::before {
+        background: var(--achievement-gold);
+    }
+
+    .achievement-card.platinum::before {
+        background: var(--achievement-platinum);
+    }
+
+    .achievement-card.diamond::before {
+        background: var(--achievement-diamond);
+    }
+
+    .achievement-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .achievement-card.locked {
+        opacity: 0.5;
+    }
+
+    .achievement-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .achievement-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        background: var(--achievement-bronze);
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    .achievement-card.silver .achievement-icon {
+        background: var(--achievement-silver);
+    }
+
+    .achievement-card.gold .achievement-icon {
+        background: var(--achievement-gold);
+    }
+
+    .achievement-card.platinum .achievement-icon {
+        background: var(--achievement-platinum);
+    }
+
+    .achievement-card.diamond .achievement-icon {
+        background: var(--achievement-diamond);
+    }
+
+    .achievement-card.locked .achievement-icon {
+        background: rgba(255, 255, 255, 0.1);
+        filter: grayscale(100%);
+    }
+
+    .achievement-icon .lock-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .achievement-info {
+        flex: 1;
+    }
+
+    .achievement-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .achievement-rarity {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .rarity-common {
+        background: rgba(205, 127, 50, 0.2);
+        color: #CD7F32;
+    }
+
+    .rarity-rare {
+        background: rgba(192, 192, 192, 0.2);
+        color: #C0C0C0;
+    }
+
+    .rarity-epic {
+        background: rgba(255, 215, 0, 0.2);
+        color: #FFD700;
+    }
+
+    .rarity-legendary {
+        background: rgba(185, 242, 255, 0.2);
+        color: #B9F2FF;
+    }
+
+    .rarity-mythic {
+        background: rgba(0, 206, 209, 0.2);
+        color: #00CED1;
+    }
+
+    .achievement-description {
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .achievement-progress {
+        margin-top: 1rem;
+    }
+
+    .progress-text {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .achievement-date {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85rem;
+        margin-top: 1rem;
+    }
+
+    .achievement-reward {
+        background: rgba(255, 215, 0, 0.1);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 10px;
+        padding: 0.8rem;
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #FFD700;
+        font-weight: 600;
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .achievements-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-overview {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="achievements-container">
+    <div class="page-header">
+        <h1>🏆 Conquistas</h1>
+        <p>Desbloqueie conquistas e mostre suas habilidades em DayZ</p>
+    </div>
+
+    <div class="stats-overview">
+        <div class="stat-card">
+            <div class="icon">🏆</div>
+            <div class="value" id="totalUnlocked">0</div>
+            <div class="label">Desbloqueadas</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="overallProgress" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="icon">⭐</div>
+            <div class="value" id="totalPoints">0</div>
+            <div class="label">Pontos de Conquista</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="icon">💎</div>
+            <div class="value" id="rareCount">0</div>
+            <div class="label">Conquistas Raras</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="icon">🔥</div>
+            <div class="value" id="completionRate">0%</div>
+            <div class="label">Taxa de Conclusão</div>
+        </div>
+    </div>
+
+    <div class="filter-tabs">
+        <div class="filter-tab active" data-filter="all">Todas</div>
+        <div class="filter-tab" data-filter="unlocked">Desbloqueadas</div>
+        <div class="filter-tab" data-filter="locked">Bloqueadas</div>
+        <div class="filter-tab" data-filter="combat">Combate</div>
+        <div class="filter-tab" data-filter="survival">Sobrevivência</div>
+        <div class="filter-tab" data-filter="exploration">Exploração</div>
+        <div class="filter-tab" data-filter="social">Social</div>
+    </div>
+
+    <div class="achievements-grid" id="achievementsGrid">
+        <!-- Achievements will be loaded here -->
+    </div>
+</div>
+
+<script>
+    // Achievement data structure
+    const achievements = [
+        {
+            id: 1,
+            title: "Primeiro Sangue",
+            description: "Elimine seu primeiro jogador em combate PvP",
+            icon: "⚔️",
+            category: "combat",
+            rarity: "common",
+            tier: "bronze",
+            points: 10,
+            unlocked: true,
+            progress: 1,
+            maxProgress: 1,
+            unlockedDate: "2025-11-15",
+            reward: "100 moedas"
+        },
+        {
+            id: 2,
+            title: "Sobrevivente Experiente",
+            description: "Sobreviva por 24 horas consecutivas",
+            icon: "🎯",
+            category: "survival",
+            rarity: "rare",
+            tier: "silver",
+            points: 25,
+            unlocked: true,
+            progress: 24,
+            maxProgress: 24,
+            unlockedDate: "2025-11-20",
+            reward: "250 moedas"
+        },
+        {
+            id: 3,
+            title: "Caçador Lendário",
+            description: "Elimine 100 jogadores em combate",
+            icon: "🔫",
+            category: "combat",
+            rarity: "epic",
+            tier: "gold",
+            points: 50,
+            unlocked: false,
+            progress: 45,
+            maxProgress: 100,
+            reward: "500 moedas + Skin exclusiva"
+        },
+        {
+            id: 4,
+            title: "Explorador do Mapa",
+            description: "Visite todas as cidades principais de Chernarus",
+            icon: "🗺️",
+            category: "exploration",
+            rarity: "rare",
+            tier: "silver",
+            points: 30,
+            unlocked: false,
+            progress: 8,
+            maxProgress: 15,
+            reward: "300 moedas"
+        },
+        {
+            id: 5,
+            title: "Mestre da Sobrevivência",
+            description: "Sobreviva por 7 dias consecutivos sem morrer",
+            icon: "🏕️",
+            category: "survival",
+            rarity: "legendary",
+            tier: "platinum",
+            points: 100,
+            unlocked: false,
+            progress: 3,
+            maxProgress: 7,
+            reward: "1000 moedas + Título especial"
+        },
+        {
+            id: 6,
+            title: "Médico de Campo",
+            description: "Cure 50 jogadores usando itens médicos",
+            icon: "💊",
+            category: "social",
+            rarity: "rare",
+            tier: "silver",
+            points: 35,
+            unlocked: false,
+            progress: 12,
+            maxProgress: 50,
+            reward: "350 moedas"
+        },
+        {
+            id: 7,
+            title: "Colecionador de Armas",
+            description: "Possua todas as armas raras do jogo",
+            icon: "🎖️",
+            category: "exploration",
+            rarity: "epic",
+            tier: "gold",
+            points: 75,
+            unlocked: false,
+            progress: 5,
+            maxProgress: 12,
+            reward: "750 moedas + Caixa de armas"
+        },
+        {
+            id: 8,
+            title: "Líder de Grupo",
+            description: "Forme um grupo com 5 ou mais jogadores",
+            icon: "👥",
+            category: "social",
+            rarity: "common",
+            tier: "bronze",
+            points: 15,
+            unlocked: true,
+            progress: 5,
+            maxProgress: 5,
+            unlockedDate: "2025-12-01",
+            reward: "150 moedas"
+        },
+        {
+            id: 9,
+            title: "Imortal",
+            description: "Sobreviva por 30 dias consecutivos",
+            icon: "👑",
+            category: "survival",
+            rarity: "mythic",
+            tier: "diamond",
+            points: 200,
+            unlocked: false,
+            progress: 3,
+            maxProgress: 30,
+            reward: "2000 moedas + Avatar exclusivo"
+        },
+        {
+            id: 10,
+            title: "Headshot Master",
+            description: "Consiga 50 headshots em combate",
+            icon: "🎯",
+            category: "combat",
+            rarity: "epic",
+            tier: "gold",
+            points: 60,
+            unlocked: false,
+            progress: 23,
+            maxProgress: 50,
+            reward: "600 moedas"
+        },
+        {
+            id: 11,
+            title: "Construtor",
+            description: "Construa uma base completa com 10 estruturas",
+            icon: "🏗️",
+            category: "survival",
+            rarity: "rare",
+            tier: "silver",
+            points: 40,
+            unlocked: false,
+            progress: 6,
+            maxProgress: 10,
+            reward: "400 moedas"
+        },
+        {
+            id: 12,
+            title: "Amigo Fiel",
+            description: "Jogue 100 horas com o mesmo grupo",
+            icon: "🤝",
+            category: "social",
+            rarity: "legendary",
+            tier: "platinum",
+            points: 90,
+            unlocked: false,
+            progress: 45,
+            maxProgress: 100,
+            reward: "900 moedas + Emblema de grupo"
+        }
+    ];
+
+    let currentFilter = 'all';
+
+    function renderAchievements(filter = 'all') {
+        const grid = document.getElementById('achievementsGrid');
+        grid.innerHTML = '';
+
+        const filtered = achievements.filter(a => {
+            if (filter === 'all') return true;
+            if (filter === 'unlocked') return a.unlocked;
+            if (filter === 'locked') return !a.unlocked;
+            return a.category === filter;
+        });
+
+        filtered.forEach((achievement, index) => {
+            const card = document.createElement('div');
+            card.className = `achievement-card ${achievement.tier} ${achievement.unlocked ? 'unlocked' : 'locked'}`;
+            card.style.animationDelay = `${index * 0.1}s`;
+
+            const progressPercent = (achievement.progress / achievement.maxProgress) * 100;
+
+            card.innerHTML = `
+            <div class="achievement-header">
+                <div class="achievement-icon">
+                    ${achievement.unlocked ? achievement.icon : '<div class="lock-overlay">🔒</div>'}
+                </div>
+                <div class="achievement-info">
+                    <div class="achievement-title">${achievement.title}</div>
+                    <span class="achievement-rarity rarity-${achievement.rarity}">${achievement.rarity}</span>
+                </div>
+            </div>
+            <div class="achievement-description">${achievement.description}</div>
+            
+            ${!achievement.unlocked ? `
+                <div class="achievement-progress">
+                    <div class="progress-text">
+                        <span>Progresso</span>
+                        <span>${achievement.progress}/${achievement.maxProgress}</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: ${progressPercent}%"></div>
+                    </div>
+                </div>
+            ` : ''}
+            
+            ${achievement.unlocked ? `
+                <div class="achievement-date">
+                    <span>🗓️</span>
+                    <span>Desbloqueada em ${new Date(achievement.unlockedDate).toLocaleDateString('pt-BR')}</span>
+                </div>
+            ` : ''}
+            
+            <div class="achievement-reward">
+                <span>🎁</span>
+                <span>${achievement.reward}</span>
+            </div>
+        `;
+
+            grid.appendChild(card);
+        });
+
+        updateStats();
+    }
+
+    function updateStats() {
+        const unlocked = achievements.filter(a => a.unlocked);
+        const totalPoints = unlocked.reduce((sum, a) => sum + a.points, 0);
+        const rareCount = unlocked.filter(a => ['epic', 'legendary', 'mythic'].includes(a.rarity)).length;
+        const completionRate = ((unlocked.length / achievements.length) * 100).toFixed(1);
+
+        document.getElementById('totalUnlocked').textContent = `${unlocked.length}/${achievements.length}`;
+        document.getElementById('totalPoints').textContent = totalPoints;
+        document.getElementById('rareCount').textContent = rareCount;
+        document.getElementById('completionRate').textContent = `${completionRate}%`;
+        document.getElementById('overallProgress').style.width = `${completionRate}%`;
+    }
+
+    // Filter tabs
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentFilter = tab.dataset.filter;
+            renderAchievements(currentFilter);
+        });
+    });
+
+    // Initial render
+    renderAchievements();
+</script>
+{% endblock %}

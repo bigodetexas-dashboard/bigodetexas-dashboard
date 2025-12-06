@@ -1,6 +1,24 @@
 import sqlite3
 import os
+import json
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# PostgreSQL Connection
+PG_URL = os.getenv("DATABASE_URL")
+
+def get_pg_conn():
+    if not PG_URL:
+        return None
+    try:
+        return psycopg2.connect(PG_URL, cursor_factory=RealDictCursor)
+    except Exception as e:
+        print(f"PG Connect Error: {e}")
+        return None
 
 DB_NAME = "pvp_events.db"
 
@@ -152,15 +170,51 @@ if __name__ == "__main__":
     conn.close()
 
 def get_all_clans():
-    """Retorna todos os clãs do arquivo clans.json"""
-    import json
-    if not os.path.exists("clans.json"):
-        return {}
-    try:
-        with open("clans.json", 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except:
-        return {}
+    """Retorna todos os clãs (Híbrido: JSON + PostgreSQL)"""
+    # 1. Carrega Clãs Legacy (JSON)
+    clans_data = {}
+    if os.path.exists("clans.json"):
+        try:
+            with open("clans.json", 'r', encoding='utf-8') as f:
+                clans_data = json.load(f)
+        except:
+            clans_data = {}
+
+    # 2. Carrega Clãs do PostgreSQL (v2)
+    conn = get_pg_conn()
+    if conn:
+        try:
+            cur = conn.cursor()
+            # Pega clãs
+            cur.execute("SELECT id, name, leader_discord_id, balance, banner_url FROM clans")
+            db_clans = cur.fetchall()
+            
+            for clan in db_clans:
+                clan_id = clan['id']
+                clan_name = clan['name'] # Usando Nome como Chave (TAG)
+                
+                # Pega membros
+                cur.execute("SELECT discord_id FROM clan_members_v2 WHERE clan_id = %s", (clan_id,))
+                members_rows = cur.fetchall()
+                members_list = [m['discord_id'] for m in members_rows]
+                
+                # Merge: Se já existe no JSON (conflito de nome), o DB ganha ou mescla?
+                # Vamos sobrescrever com dados do DB pois é mais 'oficial' se houver conflito
+                clans_data[clan_name] = {
+                    "name": clan_name,
+                    "leader": clan['leader_discord_id'],
+                    "members": members_list,
+                    "balance": clan.get('balance', 0),
+                    "banner": clan.get('banner_url', ""),
+                    "source": "db_v2",
+                    "id": clan_id
+                }
+            conn.close()
+        except Exception as e:
+            print(f"PG Read Error (Clans): {e}")
+            if conn: conn.close()
+            
+    return clans_data
 
 def get_all_players():
     """Retorna todos os jogadores do arquivo players_db.json"""
@@ -174,22 +228,61 @@ def get_all_players():
         return {}
         
 def get_economy(user_id):
-    """Retorna dados de economia do arquivo economy.json"""
-    import json
-    if not os.path.exists("economy.json"):
-        return {}
-    try:
-        with open("economy.json", 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            if user_id == "all":
-                return data
-            return data.get(str(user_id), {})
-    except:
-        return {}
+    """Retorna dados de economia (Híbrido: JSON + PostgreSQL para Saldos)"""
+    # 1. Carrega dados locais (Inventário, Conquistas, etc)
+    json_data = {}
+    if os.path.exists("economy.json"):
+        try:
+            with open("economy.json", 'r', encoding='utf-8') as f:
+                all_data = json.load(f)
+                if user_id == "all":
+                    # TODO: Sincronizar 'all' é complexo, retorna local por enquanto ou implementar loop
+                    return all_data
+                json_data = all_data.get(str(user_id), {})
+        except:
+            json_data = {}
+
+    # 2. Busca Saldo Atualizado no PostgreSQL
+    conn = get_pg_conn()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT balance FROM bank_accounts WHERE discord_id = %s", (str(user_id),))
+            row = cur.fetchone()
+            if row:
+                # Atualiza o saldo local com a verdade do servidor
+                json_data['balance'] = int(row['balance'])
+            conn.close()
+        except Exception as e:
+            print(f"PG Read Error (Economy): {e}")
+            if conn: conn.close()
+    
+    return json_data
 
 def save_economy(user_id, data):
-    """Salva dados de economia no arquivo economy.json"""
-    import json
+    """Salva dados de economia (Sincroniza Saldo no PG e resto no JSON)"""
+    user_id = str(user_id)
+    
+    # 1. Salvar Saldo no PostgreSQL
+    new_balance = data.get("balance", 0)
+    conn = get_pg_conn()
+    if conn:
+        try:
+            cur = conn.cursor()
+            # Upsert (Insert ou Update)
+            cur.execute("""
+                INSERT INTO bank_accounts (discord_id, balance, account_number, created_at)
+                VALUES (%s, %s, %s, NOW())
+                ON CONFLICT (discord_id) 
+                DO UPDATE SET balance = EXCLUDED.balance
+            """, (user_id, new_balance, f"CK-{user_id[-4:]}"))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"PG Write Error (Economy): {e}")
+            if conn: conn.close()
+
+    # 2. Salvar tudo no JSON (Backup e outros campos)
     economy_data = {}
     if os.path.exists("economy.json"):
         try:
@@ -198,10 +291,13 @@ def save_economy(user_id, data):
         except:
             pass
     
-    economy_data[str(user_id)] = data
+    economy_data[user_id] = data
     
-    with open("economy.json", 'w', encoding='utf-8') as f:
-        json.dump(economy_data, f, indent=4)
+    try:
+        with open("economy.json", 'w', encoding='utf-8') as f:
+            json.dump(economy_data, f, indent=4)
+    except Exception as e:
+        print(f"JSON Write Error: {e}")
 
 def get_player(gamertag):
     """Retorna dados de um jogador específico"""
@@ -248,6 +344,7 @@ def get_heatmap_points():
     rows = cursor.fetchall()
     conn.close()
     
+    
     # Formato esperado pelo heatmap.js: [{x: 100, y: 200, value: 1}, ...]
     # Nota: O heatmap.js espera 'x' e 'y', mas nossas coordenadas são X e Z no jogo.
     # Vamos mapear Z para Y aqui.
@@ -260,4 +357,65 @@ def get_heatmap_points():
         })
         
     return points
+
+def get_active_bases():
+    """Retorna lista de bases ativas (Híbrido: JSON + PostgreSQL)"""
+    bases = []
+    # 1. Carrega alarms.json (Legacy)
+    if os.path.exists("alarms.json"):
+        try:
+            with open("alarms.json", 'r', encoding='utf-8') as f:
+                legacy = json.load(f)
+                for bid, data in legacy.items():
+                    data['id'] = bid
+                    data['source'] = 'legacy'
+                    bases.append(data)
+        except: pass
+
+    # 2. Carrega bases_v2 (DB)
+    conn = get_pg_conn()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT b.id, b.owner_discord_id, b.clan_id, b.name, b.coord_x, b.coord_z, b.radius,
+                       c.name as clan_name
+                FROM bases_v2 b
+                LEFT JOIN clans c ON b.clan_id = c.id
+            """)
+            rows = cur.fetchall()
+            for r in rows:
+                bases.append({
+                    "id": str(r['id']),
+                    "x": r['coord_x'],
+                    "z": r['coord_z'],
+                    "radius": r['radius'],
+                    "owner_id": r['owner_discord_id'],
+                    "clan_id": r['clan_id'],
+                    "name": r['name'],
+                    "clan_name": r['clan_name'],
+                    "source": "db"
+                })
+            conn.close()
+        except: 
+            if conn: conn.close()
+            
+    return bases
+
+def check_base_permission(base_id, user_discord_id):
+    """Verifica se user tem permissão explicita na base (DB)"""
+    conn = get_pg_conn()
+    if not conn: return False
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT can_build FROM base_permissions 
+            WHERE base_id = %s AND discord_id = %s
+        """, (base_id, str(user_discord_id)))
+        row = cur.fetchone()
+        conn.close()
+        return row['can_build'] if row else False
+    except:
+        if conn: conn.close()
+        return False
 

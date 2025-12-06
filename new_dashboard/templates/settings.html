@@ -1,0 +1,861 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações - SERV. BRASIL SUL - XBOX{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+        min-height: 100vh;
+        padding: 2rem;
+    }
+
+    .settings-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 0.6s ease-out;
+    }
+
+    .page-header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 1.1rem;
+    }
+
+    .settings-layout {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 2rem;
+        animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+
+    .settings-sidebar {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 1.5rem;
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 0.5rem;
+    }
+
+    .sidebar-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+    }
+
+    .sidebar-item.active {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: #fff;
+    }
+
+    .sidebar-item .icon {
+        font-size: 1.5rem;
+    }
+
+    .settings-content {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
+    }
+
+    .settings-section {
+        display: none;
+    }
+
+    .settings-section.active {
+        display: block;
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-description {
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 2rem;
+    }
+
+    .settings-group {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .settings-group-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .setting-item:last-child {
+        border-bottom: none;
+    }
+
+    .setting-info {
+        flex: 1;
+    }
+
+    .setting-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.3rem;
+    }
+
+    .setting-description {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .setting-control {
+        margin-left: 2rem;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+        position: relative;
+        width: 60px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .toggle-switch.active {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .toggle-switch::before {
+        content: '';
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #fff;
+        top: 3px;
+        left: 3px;
+        transition: all 0.3s ease;
+    }
+
+    .toggle-switch.active::before {
+        left: 33px;
+    }
+
+    /* Select Input */
+    .select-input {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 0.6rem 1rem;
+        color: #fff;
+        font-size: 0.95rem;
+        min-width: 150px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .select-input:focus {
+        outline: none;
+        border-color: #00f2fe;
+    }
+
+    .select-input option {
+        background: #1a1f3a;
+        color: #fff;
+    }
+
+    /* Text Input */
+    .text-input {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 0.6rem 1rem;
+        color: #fff;
+        font-size: 0.95rem;
+        min-width: 200px;
+        transition: all 0.3s ease;
+    }
+
+    .text-input:focus {
+        outline: none;
+        border-color: #00f2fe;
+    }
+
+    /* Color Picker */
+    .color-picker {
+        width: 60px;
+        height: 40px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .color-picker:hover {
+        border-color: #00f2fe;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 0.8rem 2rem;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 0.8rem 2rem;
+        color: #fff;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 0.8rem 2rem;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .avatar-upload {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .upload-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+
+    .upload-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .danger-zone {
+        background: rgba(255, 107, 107, 0.1);
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .danger-zone-title {
+        color: #ff6b6b;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .success-message {
+        background: rgba(78, 205, 196, 0.2);
+        border: 1px solid rgba(78, 205, 196, 0.5);
+        border-radius: 12px;
+        padding: 1rem;
+        color: #4ecdc4;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .success-message.show {
+        display: block;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 968px) {
+        .settings-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .settings-sidebar {
+            position: static;
+            display: flex;
+            overflow-x: auto;
+            padding: 1rem;
+        }
+
+        .sidebar-item {
+            white-space: nowrap;
+            margin-bottom: 0;
+            margin-right: 0.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="page-header">
+        <h1>⚙️ Configurações</h1>
+        <p>Personalize sua experiência no servidor</p>
+    </div>
+
+    <div class="settings-layout">
+        <div class="settings-sidebar">
+            <div class="sidebar-item active" data-section="profile">
+                <span class="icon">👤</span>
+                <span>Perfil</span>
+            </div>
+            <div class="sidebar-item" data-section="appearance">
+                <span class="icon">🎨</span>
+                <span>Aparência</span>
+            </div>
+            <div class="sidebar-item" data-section="notifications">
+                <span class="icon">🔔</span>
+                <span>Notificações</span>
+            </div>
+            <div class="sidebar-item" data-section="privacy">
+                <span class="icon">🔒</span>
+                <span>Privacidade</span>
+            </div>
+            <div class="sidebar-item" data-section="game">
+                <span class="icon">🎮</span>
+                <span>Jogo</span>
+            </div>
+            <div class="sidebar-item" data-section="account">
+                <span class="icon">🛡️</span>
+                <span>Conta</span>
+            </div>
+        </div>
+
+        <div class="settings-content">
+            <div id="successMessage" class="success-message">
+                ✓ Configurações salvas com sucesso!
+            </div>
+
+            <!-- Profile Section -->
+            <div class="settings-section active" id="profile">
+                <h2 class="section-title">Perfil do Jogador</h2>
+                <p class="section-description">Gerencie suas informações pessoais e avatar</p>
+
+                <div class="settings-group">
+                    <div class="avatar-upload">
+                        <div class="profile-avatar">👤</div>
+                        <button class="upload-btn">Alterar Avatar</button>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Nome de Exibição</div>
+                            <div class="setting-description">Como você aparece para outros jogadores</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="text" class="text-input" value="Jogador123" placeholder="Seu nome">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Bio</div>
+                            <div class="setting-description">Conte um pouco sobre você</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="text" class="text-input" placeholder="Sua bio" style="min-width: 300px;">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Discord</div>
+                            <div class="setting-description">Seu nome de usuário no Discord</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="text" class="text-input" placeholder="usuario#1234">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="saveSettings()">Salvar Alterações</button>
+                    <button class="btn-secondary">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Appearance Section -->
+            <div class="settings-section" id="appearance">
+                <h2 class="section-title">Aparência</h2>
+                <p class="section-description">Personalize a interface do dashboard</p>
+
+                <div class="settings-group">
+                    <h3 class="settings-group-title">🎨 Tema</h3>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Modo Escuro</div>
+                            <div class="setting-description">Ativar tema escuro para melhor visualização</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Cor Principal</div>
+                            <div class="setting-description">Escolha a cor de destaque do dashboard</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="color" class="color-picker" value="#4facfe">
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Tamanho da Fonte</div>
+                            <div class="setting-description">Ajuste o tamanho do texto</div>
+                        </div>
+                        <div class="setting-control">
+                            <select class="select-input">
+                                <option>Pequeno</option>
+                                <option selected>Médio</option>
+                                <option>Grande</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Animações</div>
+                            <div class="setting-description">Ativar animações na interface</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="saveSettings()">Salvar Alterações</button>
+                    <button class="btn-secondary">Restaurar Padrão</button>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="settings-section" id="notifications">
+                <h2 class="section-title">Notificações</h2>
+                <p class="section-description">Gerencie como você recebe notificações</p>
+
+                <div class="settings-group">
+                    <h3 class="settings-group-title">🔔 Notificações do Jogo</h3>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Eliminações</div>
+                            <div class="setting-description">Notificar quando você eliminar um jogador</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Conquistas</div>
+                            <div class="setting-description">Notificar quando desbloquear conquistas</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Eventos do Servidor</div>
+                            <div class="setting-description">Notificar sobre eventos especiais</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Mensagens de Grupo</div>
+                            <div class="setting-description">Notificar sobre mensagens do seu grupo</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3 class="settings-group-title">📧 Notificações por Email</h3>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Resumo Semanal</div>
+                            <div class="setting-description">Receber resumo das suas estatísticas</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Atualizações do Servidor</div>
+                            <div class="setting-description">Receber notícias e atualizações</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="saveSettings()">Salvar Alterações</button>
+                </div>
+            </div>
+
+            <!-- Privacy Section -->
+            <div class="settings-section" id="privacy">
+                <h2 class="section-title">Privacidade</h2>
+                <p class="section-description">Controle quem pode ver suas informações</p>
+
+                <div class="settings-group">
+                    <h3 class="settings-group-title">🔒 Visibilidade do Perfil</h3>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Perfil Público</div>
+                            <div class="setting-description">Permitir que outros jogadores vejam seu perfil</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Mostrar Estatísticas</div>
+                            <div class="setting-description">Exibir suas estatísticas no perfil público</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Mostrar Histórico</div>
+                            <div class="setting-description">Permitir visualização do seu histórico</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Status Online</div>
+                            <div class="setting-description">Mostrar quando você está online</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="saveSettings()">Salvar Alterações</button>
+                </div>
+            </div>
+
+            <!-- Game Section -->
+            <div class="settings-section" id="game">
+                <h2 class="section-title">Configurações de Jogo</h2>
+                <p class="section-description">Ajuste suas preferências de gameplay</p>
+
+                <div class="settings-group">
+                    <h3 class="settings-group-title">🎮 Preferências</h3>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Servidor Favorito</div>
+                            <div class="setting-description">Servidor padrão para conexão rápida</div>
+                        </div>
+                        <div class="setting-control">
+                            <select class="select-input">
+                                <option selected>BRASIL SUL #1</option>
+                                <option>BRASIL SUL #2</option>
+                                <option>BRASIL NORTE #1</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Auto-Join</div>
+                            <div class="setting-description">Entrar automaticamente no servidor favorito</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Crosshair</div>
+                            <div class="setting-description">Tipo de mira preferida</div>
+                        </div>
+                        <div class="setting-control">
+                            <select class="select-input">
+                                <option>Padrão</option>
+                                <option selected>Cruz</option>
+                                <option>Ponto</option>
+                                <option>Círculo</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="saveSettings()">Salvar Alterações</button>
+                </div>
+            </div>
+
+            <!-- Account Section -->
+            <div class="settings-section" id="account">
+                <h2 class="section-title">Conta</h2>
+                <p class="section-description">Gerencie sua conta e segurança</p>
+
+                <div class="settings-group">
+                    <h3 class="settings-group-title">🛡️ Segurança</h3>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Alterar Senha</div>
+                            <div class="setting-description">Atualize sua senha de acesso</div>
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn-secondary">Alterar</button>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Autenticação em Duas Etapas</div>
+                            <div class="setting-description">Adicione uma camada extra de segurança</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Sessões Ativas</div>
+                            <div class="setting-description">Gerencie dispositivos conectados</div>
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn-secondary">Ver Sessões</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="danger-zone">
+                    <h3 class="danger-zone-title">⚠️ Zona de Perigo</h3>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-label">Excluir Conta</div>
+                            <div class="setting-description">Remover permanentemente sua conta e dados</div>
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn-danger">Excluir Conta</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Sidebar navigation
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const section = item.dataset.section;
+
+            // Update sidebar
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+
+    // Toggle switch
+    function toggleSwitch(element) {
+        element.classList.toggle('active');
+    }
+
+    // Save settings
+    function saveSettings() {
+        const message = document.getElementById('successMessage');
+        message.classList.add('show');
+
+        setTimeout(() => {
+            message.classList.remove('show');
+        }, 3000);
+    }
+</script>
+{% endblock %}

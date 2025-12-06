@@ -27,101 +27,166 @@
                 <li><a href="/heatmap" class="navbar-link"><i class="ri-fire-line"></i> Mapa de Calor</a></li>
                 <li><a href="/base" class="navbar-link"><i class="ri-map-pin-line"></i> Base</a></li>
                 <li><a href="/clan" class="navbar-link"><i class="ri-team-line"></i> Clã</a></li>
-                <li><a href="/banco" class="navbar-link"><i class="ri-bank-line"></i> Banco Sul</a></li>
-                <li><a href="/dashboard" class="navbar-link"><i class="ri-user-line"></i> Meu Perfil</a></li>
-                <li><a href="/agradecimentos" class="navbar-link"><i class="ri-hand-heart-line"></i> Agradecimentos</a>
-                </li>
-            </ul>
-            <div class="navbar-actions" style="display: flex; align-items: center; gap: 1rem;">
-                <div class="balance-display" style="color: var(--accent); font-family: 'Share Tech Mono', monospace;">
-                    <span class="balance-icon"><i class="ri-money-dollar-circle-line"></i></span>
-                    <span id="user-balance">0</span> DZCoins
-                </div>
-                <button class="btn btn-primary" id="cart-btn">
-                    <i class="ri-shopping-cart-line"></i> Carrinho (<span id="cart-count">0</span>)
-                </button>
-            </div>
-        </div>
-    </nav>
 
-    <div class="container shop-container">
-        <!-- Header da Loja -->
-        <div class="shop-header">
-            <h1 class="shop-title"><i class="ri-store-3-line"></i> Loja SERV. BRASIL SUL - XBOX</h1>
-            <p class="shop-subtitle">Compre itens com DZCoins e receba no mapa!</p>
-        </div>
+                <body>
+                    <!-- Navbar -->
+                    <nav class="navbar">
+                        <div class="navbar-container">
+                            <a href="/" class="navbar-brand">
+                                <img src="{{ url_for('static', filename='img/logo_texas.png') }}" alt="Logo"
+                                    style="height: 40px; margin-right: 10px;">
+                                <span style="font-size: 1.5rem;">SERV. BRASIL SUL - XBOX</span>
+                            </a>
+                            <ul class="navbar-menu">
+                                <li><a href="/" class="navbar-link"><i class="ri-home-line"></i> Início</a></li>
+                                <li><a href="/shop" class="navbar-link active"><i class="ri-store-2-line"></i> Loja</a>
+                                </li>
+                                <li><a href="/leaderboard" class="navbar-link"><i class="ri-trophy-line"></i>
+                                        Rankings</a>
+                                </li>
+                                <li><a href="/heatmap" class="navbar-link"><i class="ri-fire-line"></i> Mapa de
+                                        Calor</a>
+                                </li>
+                                <li><a href="/base" class="navbar-link"><i class="ri-map-pin-line"></i> Base</a></li>
+                                <li><a href="/clan" class="navbar-link"><i class="ri-team-line"></i> Clã</a></li>
+                                <li><a href="/banco" class="navbar-link"><i class="ri-bank-line"></i> Banco Sul</a></li>
+                                <li><a href="/dashboard" class="navbar-link"><i class="ri-user-line"></i> Meu Perfil</a>
+                                </li>
+                                <li><a href="/agradecimentos" class="navbar-link"><i class="ri-hand-heart-line"></i>
+                                        Agradecimentos</a>
+                                </li>
+                            </ul>
+                            <div class="navbar-actions" style="display: flex; align-items: center; gap: 1rem;">
+                                <div class="balance-display"
+                                    style="color: var(--accent); font-family: 'Share Tech Mono', monospace;">
+                                    <span class="balance-icon"><i class="ri-money-dollar-circle-line"></i></span>
+                                    <span id="user-balance">0</span> DZCoins
+                                </div>
+                                <button class="btn btn-primary" id="cart-btn">
+                                    <i class="ri-shopping-cart-line"></i> Carrinho (<span id="cart-count">0</span>)
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
 
-        <!-- Filtros e Busca -->
-        <div class="shop-controls">
-            <div class="search-box">
-                <i class="ri-search-line search-icon"></i>
-                <input type="text" id="search-input" class="search-input" placeholder="Buscar item...">
-            </div>
-            <select id="sort-select" class="category-filter">
-                <option value="name">Ordenar por Nome</option>
-                <option value="price-asc">Preço: Menor → Maior</option>
-                <option value="price-desc">Preço: Maior → Menor</option>
-            </select>
-        </div>
+                    <div class="container shop-container">
+                        <!-- Header da Loja -->
+                        <div class="shop-header">
+                            <h1 class="shop-title"><i class="ri-store-3-line"></i> Loja SERV. BRASIL SUL - XBOX</h1>
+                            <p class="shop-subtitle">Compre itens com DZCoins e receba no mapa!</p>
+                        </div>
 
-        <!-- Categorias (Tabs) -->
-        <div class="categories" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
-            <button class="category-filter active" data-category="all">Todos</button>
-            <button class="category-filter" data-category="armas"><i class="ri-crosshair-2-line"></i> Armas</button>
-            <button class="category-filter" data-category="municao"><i class="ri-disc-line"></i> Munição</button>
-            <button class="category-filter" data-category="carregadores"><i class="ri-archive-line"></i>
-                Carregadores</button>
-            <button class="category-filter" data-category="acessorios"><i class="ri-settings-4-line"></i>
-                Acessórios</button>
-            <button class="category-filter" data-category="armadilhas"><i class="ri-alert-line"></i> Armadilhas</button>
-            <button class="category-filter" data-category="medico"><i class="ri-first-aid-kit-line"></i> Médico</button>
-            <button class="category-filter" data-category="comidas"><i class="ri-restaurant-line"></i> Comida</button>
-            <button class="category-filter" data-category="roupas"><i class="ri-shirt-line"></i> Roupas</button>
-            <button class="category-filter" data-category="mochilas"><i class="ri-shopping-bag-3-line"></i>
-                Mochilas</button>
-            <button class="category-filter" data-category="construcao"><i class="ri-hammer-line"></i>
-                Construção</button>
-            <button class="category-filter" data-category="ferramentas"><i class="ri-tools-line"></i>
-                Ferramentas</button>
-            <button class="category-filter" data-category="veiculos"><i class="ri-roadster-line"></i> Veículos</button>
-            <button class="category-filter" data-category="cacador"><i class="ri-compass-3-line"></i> Caçador</button>
-        </div>
+                        <!-- Filtros e Busca -->
+                        <div class="shop-controls">
+                            <div class="search-box">
+                                <i class="ri-search-line search-icon"></i>
+                                <input type="text" id="search-input" class="search-input" placeholder="Buscar item...">
+                            </div>
+                            <select id="sort-select" class="category-filter">
+                                <option value="name">Ordenar por Nome</option>
+                                <option value="price-asc">Preço: Menor → Maior</option>
+                                <option value="price-desc">Preço: Maior → Menor</option>
+                            </select>
+                        </div>
 
-        <!-- Grid de Itens -->
-        <div id="items-grid" class="items-grid">
-            <!-- Itens serão carregados aqui via JavaScript -->
-        </div>
-    </div>
+                        <!-- Categorias (Tabs) -->
+                        <div class="categories"
+                            style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
+                            <button class="category-filter active" data-category="all">Todos</button>
+                            <button class="category-filter" data-category="armas"><i class="ri-crosshair-2-line"></i>
+                                Armas</button>
+                            <button class="category-filter" data-category="municao"><i class="ri-disc-line"></i>
+                                Munição</button>
+                            <button class="category-filter" data-category="carregadores"><i class="ri-archive-line"></i>
+                                Carregadores</button>
+                            <button class="category-filter" data-category="acessorios"><i
+                                    class="ri-settings-4-line"></i>
+                                Acessórios</button>
+                            <button class="category-filter" data-category="armadilhas"><i class="ri-alert-line"></i>
+                                Armadilhas</button>
+                            <button class="category-filter" data-category="medico"><i class="ri-first-aid-kit-line"></i>
+                                Médico</button>
+                            <button class="category-filter" data-category="comidas"><i class="ri-restaurant-line"></i>
+                                Comida</button>
+                            <button class="category-filter" data-category="roupas"><i class="ri-shirt-line"></i>
+                                Roupas</button>
+                            <button class="category-filter" data-category="mochilas"><i
+                                    class="ri-shopping-bag-3-line"></i>
+                                Mochilas</button>
+                            <button class="category-filter" data-category="construcao"><i class="ri-hammer-line"></i>
+                                Construção</button>
+                            <button class="category-filter" data-category="ferramentas"><i class="ri-tools-line"></i>
+                                Ferramentas</button>
+                            <button class="category-filter" data-category="veiculos"><i class="ri-roadster-line"></i>
+                                Veículos</button>
+                            <button class="category-filter" data-category="cacador"><i class="ri-compass-3-line"></i>
+                                Caçador</button>
+                        </div>
 
-    <!-- Modal do Carrinho -->
-    <div id="cart-modal" class="cart-modal">
-        <div class="cart-header">
-            <h2 class="cart-title"><i class="ri-shopping-cart-2-line"></i> Carrinho</h2>
-            <button class="close-cart" id="close-cart">&times;</button>
-        </div>
-        <div class="cart-items" id="cart-items">
-            <!-- Itens do carrinho aqui -->
-        </div>
-        <div class="cart-footer">
-            <div class="cart-total">
-                <span>Total:</span>
-                <span id="cart-total">0 DZCoins</span>
-            </div>
-            <button class="btn btn-secondary" id="clear-cart" style="width: 100%; margin-bottom: 1rem;">Limpar
-                Carrinho</button>
-            <button class="checkout-btn" id="checkout-btn">Finalizar Compra</button>
-        </div>
-    </div>
+                        <!-- Grid de Itens -->
+                        <div id="items-grid" class="items-grid">
+                            <!-- Itens serão carregados aqui via JavaScript -->
+                        </div>
+                    </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-            <img src="{{ url_for('static', filename='img/logo_texas.png') }}" alt="Logo" style="height: 50px;">
-            <p style="margin: 0;">&copy; 2025 SERV. BRASIL SUL - XBOX. Todos os direitos reservados.</p>
-        </div>
-    </footer>
+                    <!-- Modal do Carrinho -->
+                    <div id="cart-modal" class="cart-modal">
+                        <div class="cart-header">
+                            <h2 class="cart-title"><i class="ri-shopping-cart-2-line"></i> Carrinho</h2>
+                            <button class="close-cart" id="close-cart">&times;</button>
+                        </div>
+                        <div class="cart-items" id="cart-items">
+                            <!-- Itens do carrinho aqui -->
+                        </div>
+                        <div class="cart-footer">
+                            <div class="cart-total">
+                                <span>Total:</span>
+                                <span id="cart-total">0 DZCoins</span>
+                            </div>
+                            <button class="btn btn-secondary" id="clear-cart"
+                                style="width: 100%; margin-bottom: 1rem;">Limpar
+                                Carrinho</button>
+                            <button class="checkout-btn" id="checkout-btn">Finalizar Compra</button>
+                        </div>
+                    </div>
 
-    <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
-</body>
+                    <!-- Botão de Carrinho Flutuante -->
+                    <div class="cart-float" id="cart-float-btn">
+                        <i class="ri-shopping-cart-line"></i>
+                        <div class="cart-count-badge" id="cart-count-float">0</div>
+                    </div>
+
+                    <!-- Footer -->
+                    <footer class="footer">
+                        <div class="container"
+                            style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                            <img src="{{ url_for('static', filename='img/logo_texas.png') }}" alt="Logo"
+                                style="height: 50px;">
+                            <p style="margin: 0;">&copy; 2025 SERV. BRASIL SUL - XBOX. Todos os direitos reservados.</p>
+                        </div>
+                    </footer>
+
+                    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+                    <script src="{{ url_for('static', filename='js/shop.js') }}"></script>
+                    <script>
+                        // Sincronizar clique do botão flutuante com o botão original (para abrir o modal)
+                        document.getElementById('cart-float-btn').addEventListener('click', function () {
+                            document.getElementById('cart-btn').click();
+                        });
+
+                        // Observer para atualizar a contagem no botão flutuante
+                        const targetNode = document.getElementById('cart-count');
+                        const config = { characterData: true, subtree: true, childList: true };
+
+                        const callback = function (mutationsList, observer) {
+                            for (const mutation of mutationsList) {
+                                document.getElementById('cart-count-float').innerText = targetNode.innerText;
+                            }
+                        };
+
+                        const observer = new MutationObserver(callback);
+                        observer.observe(targetNode, config);
+                    </script>
+                </body>
 
 </html>
