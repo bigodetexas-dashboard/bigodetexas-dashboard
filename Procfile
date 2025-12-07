@@ -1,1 +1,1 @@
-web: gunicorn --chdir new_dashboard app:app
+web: cd new_dashboard && gunicorn app:app --bind 0.0.0.0:$PORT
