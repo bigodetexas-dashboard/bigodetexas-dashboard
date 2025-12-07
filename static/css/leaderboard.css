@@ -1,0 +1,371 @@
+/* ==================== LEADERBOARD STYLES (HORROR APOCALYPSE) ==================== */
+
+/* Fundo customizado para a página do Leaderboard */
+body {
+    background-image:
+        linear-gradient(rgba(5, 0, 0, 0.5), rgba(10, 5, 5, 0.6)),
+        url('../images/background_leaderboard.jpg') !important;
+    background-size: cover !important;
+    background-attachment: fixed !important;
+    background-position: center !important;
+}
+
+.leaderboard-container {
+    max-width: 1400px;
+    padding: 2rem;
+}
+
+.leaderboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid rgba(90, 26, 26, 0.3);
+    background: radial-gradient(circle at center, rgba(90, 26, 26, 0.1) 0%, transparent 70%);
+}
+
+.leaderboard-header h1 {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    text-shadow:
+        3px 3px 0px rgba(90, 26, 26, 0.4),
+        5px 5px 15px rgba(0, 0, 0, 0.9);
+}
+
+.leaderboard-header p {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+}
+
+.rankings-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+}
+
+/* Menu Lateral */
+.rankings-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    background: rgba(20, 16, 14, 0.9);
+    padding: 1.5rem;
+    border-radius: var(--radius-sm);
+    height: fit-content;
+    border: 1px solid rgba(90, 26, 26, 0.2);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.rank-btn {
+    padding: 1rem;
+    text-align: left;
+    background: rgba(5, 0, 0, 0.4);
+    border: 1px solid rgba(90, 26, 26, 0.1);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-weight: 400;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'Special Elite', cursive;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.rank-btn:hover {
+    background: rgba(30, 26, 24, 0.8);
+    color: var(--text-primary);
+    border-color: var(--secondary);
+    transform: translateX(5px);
+}
+
+.rank-btn.active {
+    background: linear-gradient(90deg, var(--secondary) 0%, rgba(90, 26, 26, 0.2) 100%);
+    border-color: var(--blood);
+    color: var(--text-primary);
+    box-shadow: 0 0 10px rgba(90, 26, 26, 0.2);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.rank-btn i {
+    font-size: 1.2rem;
+    color: var(--accent);
+}
+
+.rank-btn.active i {
+    color: var(--text-primary);
+}
+
+/* Pódio */
+.podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+    height: 400px;
+    padding-top: 2rem;
+    position: relative;
+}
+
+.podium::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 20px;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.8) 0%, transparent 70%);
+    filter: blur(10px);
+    z-index: -1;
+}
+
+.podium-place {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 220px;
+    transition: var(--transition-normal);
+}
+
+.podium-place:hover {
+    transform: translateY(-5px);
+}
+
+.podium-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    background: #000;
+}
+
+.podium-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    filter: sepia(0.2) contrast(1.1);
+}
+
+.rank-badge {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #000;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    font-family: 'Creepster', cursive;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.podium-block {
+    width: 100%;
+    background: linear-gradient(180deg, rgba(40, 30, 28, 0.95) 0%, rgba(20, 10, 8, 0.98) 100%);
+    border: 1px solid rgba(90, 26, 26, 0.3);
+    border-top: 4px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    position: relative;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+/* 1st Place */
+.place-1 .podium-block {
+    height: 240px;
+    border-top-color: #ffd700;
+    background: linear-gradient(180deg, rgba(60, 50, 20, 0.9) 0%, rgba(30, 20, 10, 0.95) 100%);
+    box-shadow:
+        inset 0 0 30px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(255, 215, 0, 0.1);
+}
+
+.place-1 .podium-avatar {
+    width: 110px;
+    height: 110px;
+    border-color: #ffd700;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.2);
+}
+
+.place-1 .rank-badge {
+    background: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+/* 2nd Place */
+.place-2 .podium-block {
+    height: 200px;
+    border-top-color: #c0c0c0;
+    background: linear-gradient(180deg, rgba(50, 50, 50, 0.9) 0%, rgba(25, 25, 25, 0.95) 100%);
+}
+
+.place-2 .podium-avatar {
+    border-color: #c0c0c0;
+    box-shadow: 0 0 20px rgba(192, 192, 192, 0.2);
+}
+
+.place-2 .rank-badge {
+    background: #c0c0c0;
+}
+
+/* 3rd Place */
+.place-3 .podium-block {
+    height: 160px;
+    border-top-color: #cd7f32;
+    background: linear-gradient(180deg, rgba(60, 40, 20, 0.9) 0%, rgba(30, 20, 10, 0.95) 100%);
+}
+
+.place-3 .podium-avatar {
+    border-color: #cd7f32;
+    box-shadow: 0 0 20px rgba(205, 127, 50, 0.2);
+}
+
+.place-3 .rank-badge {
+    background: #cd7f32;
+}
+
+.podium-name {
+    font-family: 'Creepster', cursive;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.podium-stat {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.8rem;
+    color: var(--accent);
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Ranking List */
+.ranking-list {
+    background: rgba(20, 16, 14, 0.9);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(90, 26, 26, 0.2);
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.ranking-item {
+    display: grid;
+    grid-template-columns: 60px 60px 1fr 150px;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(90, 26, 26, 0.1);
+    transition: var(--transition-fast);
+}
+
+.ranking-item:last-child {
+    border-bottom: none;
+}
+
+.ranking-item:hover {
+    background: rgba(30, 26, 24, 0.6);
+    border-color: var(--secondary);
+}
+
+.ranking-position {
+    font-family: 'Creepster', cursive;
+    font-size: 1.5rem;
+    color: var(--accent);
+    text-align: center;
+}
+
+.ranking-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid rgba(90, 26, 26, 0.3);
+    overflow: hidden;
+}
+
+.ranking-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ranking-info {
+    padding-left: 1rem;
+}
+
+.ranking-name {
+    font-family: 'Special Elite', cursive;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.2rem;
+}
+
+.ranking-gamertag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.ranking-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.3rem;
+    color: var(--accent);
+    font-weight: bold;
+    text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .rankings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rankings-menu {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        height: auto;
+    }
+
+    .podium {
+        height: auto;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .podium-place {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .place-1 .podium-block,
+    .place-2 .podium-block,
+    .place-3 .podium-block {
+        height: 200px;
+    }
+
+    .ranking-item {
+        grid-template-columns: 50px 50px 1fr 120px;
+        padding: 0.8rem 1rem;
+    }
+}

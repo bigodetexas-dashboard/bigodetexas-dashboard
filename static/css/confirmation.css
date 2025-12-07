@@ -2,7 +2,8 @@
 
 .confirmation-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--dark) 0%, var(--dark-light) 100%);
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('../images/DAYZ1494984.jpg') center/cover no-repeat fixed;
     display: flex;
     flex-direction: column;
     align-items: center;

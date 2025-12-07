@@ -1198,11 +1198,427 @@ def api_banco_transfer():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/logout')
-
 def logout():
     """Logout do usuário"""
     session.clear()
     return redirect(url_for('index'))
+
+# ==================== ACHIEVEMENTS API ====================
+
+@app.route('/api/achievements/all')
+def api_achievements_all():
+    """Retorna todas as conquistas com progresso do usuário"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        # Buscar todas as conquistas com progresso do usuário
+        cur.execute("""
+            SELECT 
+                a.achievement_key as id,
+                a.name as title,
+                a.description,
+                a.category,
+                a.rarity,
+                a.tier,
+                a.points,
+                a.reward,
+                a.icon,
+                a.max_progress as "maxProgress",
+                COALESCE(ua.progress, 0) as progress,
+                COALESCE(ua.unlocked, FALSE) as unlocked,
+                ua.unlocked_at as "unlockedDate"
+            FROM achievements a
+            LEFT JOIN user_achievements ua ON a.achievement_key = ua.achievement_key 
+                AND ua.discord_id = %s
+            ORDER BY a.category, a.tier
+        """, (str(user_id),))
+        
+        achievements = [dict(row) for row in cur.fetchall()]
+        
+        # Formatar datas
+        for ach in achievements:
+            if ach.get('unlockedDate'):
+                ach['unlockedDate'] = ach['unlockedDate'].strftime('%Y-%m-%d')
+        
+        return jsonify(achievements)
+        
+    except Exception as e:
+        print(f"Erro ao buscar conquistas: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/api/achievements/stats')
+def api_achievements_stats():
+    """Estatísticas de conquistas do usuário"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        # Buscar estatísticas
+        cur.execute("""
+            SELECT 
+                COUNT(*) FILTER (WHERE ua.unlocked = TRUE) as total_unlocked,
+                COUNT(*) as total_achievements,
+                COALESCE(SUM(a.points) FILTER (WHERE ua.unlocked = TRUE), 0) as total_points,
+                COUNT(*) FILTER (WHERE ua.unlocked = TRUE AND a.rarity IN ('epic', 'legendary', 'mythic')) as rare_count,
+                ROUND(100.0 * COUNT(*) FILTER (WHERE ua.unlocked = TRUE) / NULLIF(COUNT(*), 0), 1) as completion_rate
+            FROM achievements a
+            LEFT JOIN user_achievements ua ON a.achievement_key = ua.achievement_key 
+                AND ua.discord_id = %s
+        """, (str(user_id),))
+        
+        stats = dict(cur.fetchone())
+        
+        return jsonify(stats)
+        
+    except Exception as e:
+        print(f"Erro ao buscar stats de conquistas: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/api/achievements/unlock', methods=['POST'])
+def api_achievements_unlock():
+    """Desbloquear ou atualizar progresso de conquista"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    achievement_key = data.get('achievement_key')
+    progress_increment = data.get('progress', 1)
+    
+    if not achievement_key:
+        return jsonify({'error': 'achievement_key é obrigatório'}), 400
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        # Usar função do banco para atualizar progresso
+        cur.execute("""
+            SELECT update_achievement_progress(%s, %s, %s) as unlocked
+        """, (str(user_id), achievement_key, progress_increment))
+        
+        result = cur.fetchone()
+        conn.commit()
+        
+        unlocked = result['unlocked'] if result else False
+        
+        # Se desbloqueou, adicionar ao histórico
+        if unlocked:
+            cur.execute("""
+                SELECT name, reward FROM achievements WHERE achievement_key = %s
+            """, (achievement_key,))
+            ach = cur.fetchone()
+            
+            if ach:
+                cur.execute("""
+                    SELECT add_activity_event(%s, %s, %s, %s, %s, %s)
+                """, (
+                    str(user_id),
+                    'achievement',
+                    '🏆',
+                    'Conquista Desbloqueada',
+                    f'Você desbloqueou "{ach["name"]}"',
+                    json.dumps({'reward': ach['reward']})
+                ))
+                conn.commit()
+        
+        return jsonify({
+            'success': True,
+            'unlocked': unlocked
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Erro ao atualizar conquista: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+# ==================== HISTORY API ====================
+
+@app.route('/api/history/events')
+def api_history_events():
+    """Retorna histórico de atividades do usuário"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    # Parâmetros de filtro
+    event_type = request.args.get('type', 'all')
+    period = request.args.get('period', 'all')
+    limit = int(request.args.get('limit', 50))
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        # Construir query com filtros
+        where_clauses = ["discord_id = %s"]
+        params = [str(user_id)]
+        
+        if event_type != 'all':
+            where_clauses.append("event_type = %s")
+            params.append(event_type)
+        
+        # Filtro de período
+        if period == 'today':
+            where_clauses.append("timestamp >= CURRENT_DATE")
+        elif period == 'week':
+            where_clauses.append("timestamp >= CURRENT_DATE - INTERVAL '7 days'")
+        elif period == 'month':
+            where_clauses.append("timestamp >= CURRENT_DATE - INTERVAL '30 days'")
+        
+        where_sql = " AND ".join(where_clauses)
+        
+        cur.execute(f"""
+            SELECT 
+                id,
+                event_type as type,
+                icon,
+                title,
+                description,
+                details,
+                timestamp
+            FROM activity_history
+            WHERE {where_sql}
+            ORDER BY timestamp DESC
+            LIMIT %s
+        """, params + [limit])
+        
+        events = [dict(row) for row in cur.fetchall()]
+        
+        # Formatar timestamps
+        for event in events:
+            event['timestamp'] = event['timestamp'].isoformat()
+        
+        return jsonify(events)
+        
+    except Exception as e:
+        print(f"Erro ao buscar histórico: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/api/history/stats')
+def api_history_stats():
+    """Estatísticas do histórico"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    period = request.args.get('period', 'all')
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        # Filtro de período
+        period_filter = ""
+        if period == 'today':
+            period_filter = "AND timestamp >= CURRENT_DATE"
+        elif period == 'week':
+            period_filter = "AND timestamp >= CURRENT_DATE - INTERVAL '7 days'"
+        elif period == 'month':
+            period_filter = "AND timestamp >= CURRENT_DATE - INTERVAL '30 days'"
+        
+        cur.execute(f"""
+            SELECT 
+                COUNT(*) as total_events,
+                COUNT(*) FILTER (WHERE event_type = 'kill') as total_kills,
+                COUNT(*) FILTER (WHERE event_type = 'death') as total_deaths,
+                CASE 
+                    WHEN COUNT(*) FILTER (WHERE event_type = 'death') > 0 
+                    THEN ROUND(CAST(COUNT(*) FILTER (WHERE event_type = 'kill') AS NUMERIC) / 
+                               COUNT(*) FILTER (WHERE event_type = 'death'), 2)
+                    ELSE COUNT(*) FILTER (WHERE event_type = 'kill')
+                END as kd_ratio
+            FROM activity_history
+            WHERE discord_id = %s {period_filter}
+        """, (str(user_id),))
+        
+        stats = dict(cur.fetchone())
+        
+        # Calcular sessão média (placeholder)
+        stats['avg_session'] = '2.5h'
+        
+        return jsonify(stats)
+        
+    except Exception as e:
+        print(f"Erro ao buscar stats de histórico: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/api/history/add', methods=['POST'])
+def api_history_add():
+    """Adicionar evento ao histórico"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    event_type = data.get('event_type')
+    icon = data.get('icon', '📝')
+    title = data.get('title')
+    description = data.get('description', '')
+    details = data.get('details', {})
+    
+    if not event_type or not title:
+        return jsonify({'error': 'event_type e title são obrigatórios'}), 400
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        cur.execute("""
+            SELECT add_activity_event(%s, %s, %s, %s, %s, %s) as event_id
+        """, (str(user_id), event_type, icon, title, description, json.dumps(details)))
+        
+        result = cur.fetchone()
+        conn.commit()
+        
+        return jsonify({
+            'success': True,
+            'event_id': result['event_id']
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Erro ao adicionar evento: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+# ==================== SETTINGS API ====================
+
+@app.route('/api/settings/get')
+def api_settings_get():
+    """Retorna configurações do usuário"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        cur.execute("""
+            SELECT * FROM user_settings WHERE discord_id = %s
+        """, (str(user_id),))
+        
+        settings = cur.fetchone()
+        
+        if not settings:
+            # Criar configurações padrão
+            cur.execute("""
+                INSERT INTO user_settings (discord_id)
+                VALUES (%s)
+                RETURNING *
+            """, (str(user_id),))
+            settings = cur.fetchone()
+            conn.commit()
+        
+        return jsonify(dict(settings))
+        
+    except Exception as e:
+        print(f"Erro ao buscar configurações: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/api/settings/update', methods=['POST'])
+def api_settings_update():
+    """Atualizar configurações do usuário"""
+    user_id = session.get('discord_user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    try:
+        # Construir query de update dinamicamente
+        update_fields = []
+        params = []
+        
+        allowed_fields = [
+            'display_name', 'bio', 'discord_username',
+            'dark_mode', 'primary_color', 'font_size', 'animations_enabled',
+            'notify_kills', 'notify_achievements', 'notify_events', 'notify_group_messages',
+            'notify_weekly_summary', 'notify_server_updates',
+            'profile_public', 'show_stats', 'show_history', 'show_online_status',
+            'favorite_server', 'auto_join', 'crosshair_type',
+            'two_factor_enabled'
+        ]
+        
+        for field in allowed_fields:
+            if field in data:
+                update_fields.append(f"{field} = %s")
+                params.append(data[field])
+        
+        if not update_fields:
+            return jsonify({'error': 'Nenhum campo para atualizar'}), 400
+        
+        # Adicionar updated_at
+        update_fields.append("updated_at = NOW()")
+        params.append(str(user_id))
+        
+        update_sql = ", ".join(update_fields)
+        
+        cur.execute(f"""
+            UPDATE user_settings
+            SET {update_sql}
+            WHERE discord_id = %s
+            RETURNING *
+        """, params)
+        
+        updated_settings = cur.fetchone()
+        conn.commit()
+        
+        if not updated_settings:
+            # Se não existe, criar
+            cur.execute("""
+                INSERT INTO user_settings (discord_id)
+                VALUES (%s)
+                RETURNING *
+            """, (str(user_id),))
+            updated_settings = cur.fetchone()
+            conn.commit()
+        
+        return jsonify({
+            'success': True,
+            'settings': dict(updated_settings)
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Erro ao atualizar configurações: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

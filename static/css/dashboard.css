@@ -1,0 +1,446 @@
+/* ==================== DASHBOARD STYLES (DAYZ THEME) ==================== */
+
+/* Fundo customizado para a página Meu Perfil */
+body {
+    background-image:
+        linear-gradient(rgba(5, 0, 0, 0.5), rgba(10, 5, 5, 0.6)),
+        url('../images/background_dashboard.jpg') !important;
+    background-size: cover !important;
+    background-attachment: fixed !important;
+    background-position: center !important;
+}
+
+/* Profile Header */
+.profile-header {
+    background: rgba(20, 20, 20, 0.85);
+    border-radius: var(--radius-sm);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid var(--primary);
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(107, 140, 66, 0.3);
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+}
+
+.gamertag {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+.profile-badges {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'Oswald', sans-serif;
+}
+
+.badge-vip {
+    background: var(--accent);
+    color: #000;
+}
+
+.badge-veteran {
+    background: var(--primary-dark);
+    color: white;
+    border: 1px solid var(--primary);
+}
+
+.profile-balance {
+    margin-left: auto;
+    text-align: right;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.balance-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: 'Oswald', sans-serif;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.balance-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'Oswald', sans-serif;
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.stats-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--primary);
+    padding-left: 1rem;
+    font-family: 'Oswald', sans-serif;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-box {
+    background: rgba(20, 20, 20, 0.8);
+    padding: 1.5rem;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: var(--transition-fast);
+}
+
+.stat-box:hover {
+    background: rgba(30, 30, 30, 0.9);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    color: var(--primary);
+    background: rgba(107, 140, 66, 0.1);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(107, 140, 66, 0.3);
+}
+
+.stat-data {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: 'Oswald', sans-serif;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+/* Sidebar */
+.sidebar-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+    font-family: 'Oswald', sans-serif;
+}
+
+.achievements-card,
+.history-card {
+    background: rgba(20, 20, 20, 0.8);
+    padding: 1.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 2rem;
+}
+
+.purchase-history {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.purchase-item {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.purchase-item:last-child {
+    border-bottom: none;
+}
+
+.purchase-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.purchase-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.purchase-price {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-balance {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==================== TABS NAVIGATION ==================== */
+.profile-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background: rgba(20, 20, 20, 0.6);
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.tab-btn:hover {
+    background: rgba(107, 140, 66, 0.1);
+    color: var(--primary);
+}
+
+.tab-btn.active {
+    background: var(--primary);
+    color: #000;
+    box-shadow: 0 4px 15px rgba(107, 140, 66, 0.3);
+}
+
+.tab-btn i {
+    font-size: 1.2rem;
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==================== SETTINGS TAB ==================== */
+.settings-card {
+    background: rgba(20, 20, 20, 0.8);
+    padding: 2rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.settings-card h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary);
+    padding-left: 1rem;
+    font-family: 'Oswald', sans-serif;
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.settings-section h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+    font-family: 'Oswald', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gamertag-form {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.form-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition-fast);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(107, 140, 66, 0.2);
+}
+
+.setting-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.setting-toggle:hover {
+    background: rgba(107, 140, 66, 0.1);
+}
+
+.setting-toggle input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.setting-toggle span {
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+/* Achievements and History in Tabs */
+.tab-content .achievements-card,
+.tab-content .history-card {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.tab-content .achievements-card h2,
+.tab-content .history-card h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary);
+    padding-left: 1rem;
+    font-family: 'Oswald', sans-serif;
+}
+
+/* Responsive Tabs */
+@media (max-width: 768px) {
+    .profile-tabs {
+        flex-direction: column;
+    }
+
+    .tab-btn {
+        width: 100%;
+    }
+
+    .gamertag-form {
+        flex-direction: column;
+    }
+}

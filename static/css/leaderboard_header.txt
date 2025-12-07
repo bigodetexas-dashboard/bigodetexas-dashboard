@@ -1,0 +1,17 @@
+﻿/* ==================== LEADERBOARD STYLES (HORROR APOCALYPSE) ==================== */
+
+/* Fundo customizado para a página do Leaderboard */
+body {
+    background-image:
+        linear-gradient(rgba(5, 0, 0, 0.5), rgba(10, 5, 5, 0.6)),
+        url('../images/background_leaderboard.jpg') !important;
+    background-size: cover !important;
+    background-attachment: fixed !important;
+    background-position: center !important;
+}
+
+.leaderboard-container {
+    max-width: 1400px;
+    padding: 2rem;
+}
+

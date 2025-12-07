@@ -1,0 +1,438 @@
+/* Agradecimentos - Página Premium */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0a0a;
+    color: #ffffff;
+    overflow-x: hidden;
+}
+
+/* Navegação */
+.navbar {
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-logo img {
+    height: 40px;
+    width: auto;
+}
+
+.nav-logo span {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-menu a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+}
+
+.nav-menu a:hover {
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.nav-menu a.active {
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.2);
+    border-bottom: 2px solid #ffd700;
+}
+
+/* Hero Section */
+.hero-section {
+    min-height: 100vh;
+    background-image: url('/static/img/agradecimentos_bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    position: relative;
+    padding-top: 80px;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom,
+            rgba(10, 10, 10, 0.7) 0%,
+            rgba(10, 10, 10, 0.85) 50%,
+            rgba(10, 10, 10, 0.95) 100%);
+}
+
+.content-wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+/* Título Principal */
+.main-title {
+    text-align: center;
+    margin-bottom: 4rem;
+    animation: fadeInDown 1s ease;
+}
+
+.handshake-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    animation: pulse 2s infinite;
+}
+
+.main-title h1 {
+    font-size: 4rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    color: #cccccc;
+    font-style: italic;
+}
+
+/* Citações */
+.quotes-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.quote-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 15px;
+    padding: 2rem;
+    position: relative;
+    transition: all 0.3s ease;
+    animation: fadeInUp 1s ease;
+}
+
+.quote-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 215, 0, 0.5);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+}
+
+.quote-icon {
+    font-size: 4rem;
+    color: rgba(255, 215, 0, 0.3);
+    line-height: 0;
+    margin-bottom: 1rem;
+}
+
+.quote-text {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+.quote-author {
+    text-align: right;
+    color: #ffd700;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* História */
+.story-section {
+    margin-bottom: 4rem;
+}
+
+.story-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    padding: 3rem;
+    animation: fadeIn 1.5s ease;
+}
+
+.story-card h2 {
+    font-size: 2.5rem;
+    color: #ffd700;
+    text-align: center;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.story-intro {
+    font-size: 1.3rem;
+    text-align: center;
+    color: #cccccc;
+    font-style: italic;
+    margin-bottom: 3rem;
+}
+
+/* Timeline de Memórias */
+.memory-timeline {
+    position: relative;
+    padding-left: 3rem;
+    margin-bottom: 3rem;
+}
+
+.memory-timeline::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #ffd700, rgba(255, 215, 0, 0.3));
+}
+
+.memory-item {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    position: relative;
+    animation: slideInLeft 1s ease;
+}
+
+.memory-icon {
+    font-size: 3rem;
+    min-width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 215, 0, 0.1);
+    border: 2px solid #ffd700;
+    border-radius: 50%;
+    position: relative;
+    z-index: 1;
+}
+
+.memory-text h3 {
+    font-size: 1.5rem;
+    color: #ffd700;
+    margin-bottom: 0.5rem;
+}
+
+.memory-text p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #cccccc;
+}
+
+/* Mensagem de Gratidão */
+.gratitude-message {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+    border: 2px solid #ffd700;
+    border-radius: 20px;
+    padding: 3rem;
+    text-align: center;
+    animation: glow 2s infinite alternate;
+}
+
+.gratitude-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.gratitude-message h2 {
+    font-size: 3rem;
+    color: #ffd700;
+    margin-bottom: 1rem;
+}
+
+.gratitude-text {
+    font-size: 1.3rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+}
+
+.friends-names {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.friend-name {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    padding: 0.5rem 1.5rem;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 10px;
+    border: 2px solid #ffd700;
+}
+
+.separator {
+    font-size: 2rem;
+    color: #ffd700;
+}
+
+.final-message {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #ffffff;
+    margin-top: 2rem;
+    font-style: italic;
+}
+
+/* Rodapé */
+.page-footer {
+    text-align: center;
+    padding: 2rem;
+    color: #888888;
+    border-top: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.page-footer p {
+    margin: 0.5rem 0;
+}
+
+.years {
+    color: #ffd700;
+    font-weight: bold;
+}
+
+/* Animações */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+
+    to {
+        box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+    }
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .main-title h1 {
+        font-size: 2.5rem;
+    }
+
+    .quotes-section {
+        grid-template-columns: 1fr;
+    }
+
+    .memory-timeline {
+        padding-left: 2rem;
+    }
+
+    .friend-name {
+        font-size: 1.5rem;
+    }
+
+    .nav-menu {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

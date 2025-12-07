@@ -429,182 +429,98 @@
 </div>
 
 <script>
-    // Achievement data structure
-    const achievements = [
-        {
-            id: 1,
-            title: "Primeiro Sangue",
-            description: "Elimine seu primeiro jogador em combate PvP",
-            icon: "⚔️",
-            category: "combat",
-            rarity: "common",
-            tier: "bronze",
-            points: 10,
-            unlocked: true,
-            progress: 1,
-            maxProgress: 1,
-            unlockedDate: "2025-11-15",
-            reward: "100 moedas"
-        },
-        {
-            id: 2,
-            title: "Sobrevivente Experiente",
-            description: "Sobreviva por 24 horas consecutivas",
-            icon: "🎯",
-            category: "survival",
-            rarity: "rare",
-            tier: "silver",
-            points: 25,
-            unlocked: true,
-            progress: 24,
-            maxProgress: 24,
-            unlockedDate: "2025-11-20",
-            reward: "250 moedas"
-        },
-        {
-            id: 3,
-            title: "Caçador Lendário",
-            description: "Elimine 100 jogadores em combate",
-            icon: "🔫",
-            category: "combat",
-            rarity: "epic",
-            tier: "gold",
-            points: 50,
-            unlocked: false,
-            progress: 45,
-            maxProgress: 100,
-            reward: "500 moedas + Skin exclusiva"
-        },
-        {
-            id: 4,
-            title: "Explorador do Mapa",
-            description: "Visite todas as cidades principais de Chernarus",
-            icon: "🗺️",
-            category: "exploration",
-            rarity: "rare",
-            tier: "silver",
-            points: 30,
-            unlocked: false,
-            progress: 8,
-            maxProgress: 15,
-            reward: "300 moedas"
-        },
-        {
-            id: 5,
-            title: "Mestre da Sobrevivência",
-            description: "Sobreviva por 7 dias consecutivos sem morrer",
-            icon: "🏕️",
-            category: "survival",
-            rarity: "legendary",
-            tier: "platinum",
-            points: 100,
-            unlocked: false,
-            progress: 3,
-            maxProgress: 7,
-            reward: "1000 moedas + Título especial"
-        },
-        {
-            id: 6,
-            title: "Médico de Campo",
-            description: "Cure 50 jogadores usando itens médicos",
-            icon: "💊",
-            category: "social",
-            rarity: "rare",
-            tier: "silver",
-            points: 35,
-            unlocked: false,
-            progress: 12,
-            maxProgress: 50,
-            reward: "350 moedas"
-        },
-        {
-            id: 7,
-            title: "Colecionador de Armas",
-            description: "Possua todas as armas raras do jogo",
-            icon: "🎖️",
-            category: "exploration",
-            rarity: "epic",
-            tier: "gold",
-            points: 75,
-            unlocked: false,
-            progress: 5,
-            maxProgress: 12,
-            reward: "750 moedas + Caixa de armas"
-        },
-        {
-            id: 8,
-            title: "Líder de Grupo",
-            description: "Forme um grupo com 5 ou mais jogadores",
-            icon: "👥",
-            category: "social",
-            rarity: "common",
-            tier: "bronze",
-            points: 15,
-            unlocked: true,
-            progress: 5,
-            maxProgress: 5,
-            unlockedDate: "2025-12-01",
-            reward: "150 moedas"
-        },
-        {
-            id: 9,
-            title: "Imortal",
-            description: "Sobreviva por 30 dias consecutivos",
-            icon: "👑",
-            category: "survival",
-            rarity: "mythic",
-            tier: "diamond",
-            points: 200,
-            unlocked: false,
-            progress: 3,
-            maxProgress: 30,
-            reward: "2000 moedas + Avatar exclusivo"
-        },
-        {
-            id: 10,
-            title: "Headshot Master",
-            description: "Consiga 50 headshots em combate",
-            icon: "🎯",
-            category: "combat",
-            rarity: "epic",
-            tier: "gold",
-            points: 60,
-            unlocked: false,
-            progress: 23,
-            maxProgress: 50,
-            reward: "600 moedas"
-        },
-        {
-            id: 11,
-            title: "Construtor",
-            description: "Construa uma base completa com 10 estruturas",
-            icon: "🏗️",
-            category: "survival",
-            rarity: "rare",
-            tier: "silver",
-            points: 40,
-            unlocked: false,
-            progress: 6,
-            maxProgress: 10,
-            reward: "400 moedas"
-        },
-        {
-            id: 12,
-            title: "Amigo Fiel",
-            description: "Jogue 100 horas com o mesmo grupo",
-            icon: "🤝",
-            category: "social",
-            rarity: "legendary",
-            tier: "platinum",
-            points: 90,
-            unlocked: false,
-            progress: 45,
-            maxProgress: 100,
-            reward: "900 moedas + Emblema de grupo"
-        }
-    ];
-
+    // Carregar conquistas da API
+    let achievements = [];
     let currentFilter = 'all';
+
+    async function loadAchievements() {
+        try {
+            const response = await fetch('/api/achievements/all');
+            const data = await response.json();
+
+            if (response.ok) {
+                achievements = data;
+                renderAchievements(currentFilter);
+                await loadStats();
+            } else {
+                console.error('Erro ao carregar conquistas:', data.error);
+                // Fallback para dados mockados se API falhar
+                loadMockData();
+            }
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            loadMockData();
+        }
+    }
+
+    async function loadStats() {
+        try {
+            const response = await fetch('/api/achievements/stats');
+            const data = await response.json();
+
+            if (response.ok) {
+                document.getElementById('totalUnlocked').textContent = `${data.total_unlocked}/${data.total_achievements}`;
+                document.getElementById('totalPoints').textContent = data.total_points || 0;
+                document.getElementById('rareCount').textContent = data.rare_count || 0;
+                document.getElementById('completionRate').textContent = `${data.completion_rate || 0}%`;
+                document.getElementById('overallProgress').style.width = `${data.completion_rate || 0}%`;
+            }
+        } catch (error) {
+            console.error('Erro ao carregar stats:', error);
+        }
+    }
+
+    function loadMockData() {
+        // Dados mockados como fallback
+        achievements = [
+            {
+                id: 'first_kill',
+                title: "Primeiro Sangue",
+                description: "Elimine seu primeiro jogador em combate PvP",
+                icon: "⚔️",
+                category: "combat",
+                rarity: "common",
+                tier: "bronze",
+                points: 10,
+                unlocked: true,
+                progress: 1,
+                maxProgress: 1,
+                unlockedDate: "2025-11-15",
+                reward: "100 moedas"
+            },
+            {
+                id: 'survivor_24h',
+                title: "Sobrevivente Experiente",
+                description: "Sobreviva por 24 horas consecutivas",
+                icon: "🎯",
+                category: "survival",
+                rarity: "rare",
+                tier: "silver",
+                points: 25,
+                unlocked: true,
+                progress: 24,
+                maxProgress: 24,
+                unlockedDate: "2025-11-20",
+                reward: "250 moedas"
+            },
+            {
+                id: 'killer_100',
+                title: "Caçador Lendário",
+                description: "Elimine 100 jogadores em combate",
+                icon: "🔫",
+                category: "combat",
+                rarity: "epic",
+                tier: "gold",
+                points: 50,
+                unlocked: false,
+                progress: 45,
+                maxProgress: 100,
+                reward: "500 moedas + Skin exclusiva"
+            }
+        ];
+        renderAchievements(currentFilter);
+        updateStats();
+    }
 
     function renderAchievements(filter = 'all') {
         const grid = document.getElementById('achievementsGrid');
@@ -648,7 +564,7 @@
                 </div>
             ` : ''}
             
-            ${achievement.unlocked ? `
+            ${achievement.unlocked && achievement.unlockedDate ? `
                 <div class="achievement-date">
                     <span>🗓️</span>
                     <span>Desbloqueada em ${new Date(achievement.unlockedDate).toLocaleDateString('pt-BR')}</span>
@@ -671,7 +587,7 @@
         const unlocked = achievements.filter(a => a.unlocked);
         const totalPoints = unlocked.reduce((sum, a) => sum + a.points, 0);
         const rareCount = unlocked.filter(a => ['epic', 'legendary', 'mythic'].includes(a.rarity)).length;
-        const completionRate = ((unlocked.length / achievements.length) * 100).toFixed(1);
+        const completionRate = achievements.length > 0 ? ((unlocked.length / achievements.length) * 100).toFixed(1) : 0;
 
         document.getElementById('totalUnlocked').textContent = `${unlocked.length}/${achievements.length}`;
         document.getElementById('totalPoints').textContent = totalPoints;
@@ -690,7 +606,7 @@
         });
     });
 
-    // Initial render
-    renderAchievements();
+    // Initial load
+    loadAchievements();
 </script>
 {% endblock %}
